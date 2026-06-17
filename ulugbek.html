@@ -493,13 +493,21 @@
       font-weight: 500;
       font-size: 0.8rem;
       color: #1a3450;
-      cursor: default;
+      cursor: pointer;
       transition: 0.15s;
+    }
+
+    .btn:hover {
+      background: #d5e0ec;
     }
 
     .btn-primary {
       background: #0a192f;
       color: white;
+    }
+
+    .btn-primary:hover {
+      background: #1a3450;
     }
 
     .btn-primary i {
@@ -528,6 +536,7 @@
       align-items: center;
       justify-content: center;
       min-height: 70vh;
+      width: 100%;
     }
 
     .auth-card {
@@ -603,6 +612,40 @@
 
     .hide {
       display: none !important;
+    }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #0a192f;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      z-index: 9999;
+      animation: slideIn 0.3s ease;
+    }
+
+    .toast.success {
+      background: #1b6e47;
+    }
+
+    .toast.error {
+      background: #b33c3c;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
     }
 
     /* ===== RESPONSIVE ===== */
@@ -709,7 +752,7 @@
       <div class="topbar-right">
         <div class="user-profile">
           <div class="avatar"><i class="fas fa-user"></i></div>
-          <span>Admin</span>
+          <span id="usernameDisplay">Admin</span>
         </div>
         <button class="logout-btn" id="logoutBtn" title="Logout">
           <i class="fas fa-sign-out-alt"></i>
@@ -722,7 +765,6 @@
 
       <!-- ===== PANEL: DASHBOARD ===== -->
       <div class="panel active" id="panel-dashboard">
-        <!-- KPI Cards -->
         <div class="kpi-grid">
           <div class="kpi-card">
             <div class="label">Inventory Items</div>
@@ -746,7 +788,6 @@
           </div>
         </div>
 
-        <!-- System Status -->
         <div class="status-indicator">
           <span class="status-item"><span class="dot green"></span> Backend API <strong>online</strong></span>
           <span class="status-item"><span class="dot green"></span> Frontend App <strong>online</strong></span>
@@ -754,7 +795,6 @@
           <span class="status-item"><span class="dot orange"></span> System load 73%</span>
         </div>
 
-        <!-- Recent Orders -->
         <div class="section-title"><i class="fas fa-chart-simple"></i> Recent ERP Orders</div>
         <div class="card-table-wrap">
           <table>
@@ -793,8 +833,8 @@
           </table>
         </div>
         <div class="mt-2">
-          <button class="btn btn-primary"><i class="fas fa-plus"></i> Create ERP Order</button>
-          <button class="btn"><i class="fas fa-file-invoice"></i> Business Operations</button>
+          <button class="btn btn-primary" onclick="showToast('ERP Order Created Successfully!', 'success')"><i class="fas fa-plus"></i> Create ERP Order</button>
+          <button class="btn" onclick="showToast('Business Operations Dashboard Opened', 'info')"><i class="fas fa-file-invoice"></i> Business Operations</button>
         </div>
       </div>
 
@@ -828,12 +868,12 @@
           </table>
         </div>
         <div class="mt-2">
-          <button class="btn btn-primary"><i class="fas fa-boxes"></i> Create Warehouse Dispatch</button>
-          <button class="btn"><i class="fas fa-arrow-right"></i> Incoming Stock</button>
+          <button class="btn btn-primary" onclick="showToast('Warehouse Dispatch Created Successfully!', 'success')"><i class="fas fa-boxes"></i> Create Warehouse Dispatch</button>
+          <button class="btn" onclick="showToast('Incoming Stock View Opened', 'info')"><i class="fas fa-arrow-right"></i> Incoming Stock</button>
         </div>
       </div>
 
-      <!-- ===== AUTH PANEL (hidden by default) ===== -->
+      <!-- ===== AUTH PANEL ===== -->
       <div id="authPanel" class="hide">
         <div class="auth-wrapper">
           <!-- Login -->
@@ -854,6 +894,7 @@
             <input type="text" id="regUser" placeholder="Username">
             <input type="email" id="regEmail" placeholder="Email">
             <input type="password" id="regPass" placeholder="Password">
+            <input type="password" id="regConfirmPass" placeholder="Confirm Password">
             <button id="registerBtn"><i class="fas fa-user-check"></i> Register</button>
             <span class="link" id="showLogin">← Back to login</span>
           </div>
@@ -877,12 +918,7 @@
       'use strict';
 
       // ============================================================
-      //  API CONFIGURATION (keep existing endpoints)
-      // ============================================================
-      const API_BASE = window.location.origin + '/api';
-
-      // ============================================================
-      //  DEMO / FALLBACK DATA (used if backend returns empty)
+      //  DEMO DATA
       // ============================================================
       const DEMO_ORDERS = [
         { id: 'ERP-1001', customer: 'Fashion Wholesale Ltd', date: '2026-06-14', value: 18450, status: 'processed' },
@@ -919,7 +955,7 @@
       //  STATE
       // ============================================================
       let isLoggedIn = true;
-      let currentPanel = 'dashboard';
+      let currentUser = 'Admin';
 
       // ============================================================
       //  DOM REFS
@@ -936,29 +972,37 @@
       const loginCard = document.getElementById('loginCard');
       const registerCard = document.getElementById('registerCard');
       const forgotCard = document.getElementById('forgotCard');
+      const usernameDisplay = document.getElementById('usernameDisplay');
+
+      // ============================================================
+      //  TOAST FUNCTION
+      // ============================================================
+      window.showToast = function(message, type = 'success') {
+        const existing = document.querySelector('.toast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateX(100%)';
+          toast.style.transition = '0.3s';
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      };
 
       // ============================================================
       //  RENDER FUNCTIONS
       // ============================================================
 
-      // Render ERP orders (also populates dashboard table)
       function renderERPOrders(orders) {
         const data = (orders && orders.length) ? orders : DEMO_ORDERS;
-
-        // ERP panel table
         const erpTbody = document.getElementById('erpOrderBody');
-        const statusMap = {
-          pending: 'warning',
-          processed: 'success',
-          dispatched: 'info',
-          cancelled: 'danger'
-        };
-        const statusLabel = {
-          pending: 'Pending',
-          processed: 'Processed',
-          dispatched: 'Dispatched',
-          cancelled: 'Cancelled'
-        };
+        const statusMap = { pending: 'warning', processed: 'success', dispatched: 'info', cancelled: 'danger' };
+        const statusLabel = { pending: 'Pending', processed: 'Processed', dispatched: 'Dispatched', cancelled: 'Cancelled' };
 
         const rows = data.map(o => `
           <tr>
@@ -972,49 +1016,7 @@
 
         if (erpTbody) erpTbody.innerHTML = rows;
 
-        // Dashboard table (first 4)
         const dashTbody = document.getElementById('dashOrderBody');
         if (dashTbody) {
           const dashRows = data.slice(0, 4).map(o => `
-            <tr>
-              <td><strong>${o.id}</strong></td>
-              <td>${o.customer}</td>
-              <td>${o.date}</td>
-              <td>€${o.value.toLocaleString()}</td>
-              <td><span class="badge ${statusMap[o.status] || 'secondary'}">${statusLabel[o.status] || o.status}</span></td>
-            </tr>
-          `).join('');
-          dashTbody.innerHTML = dashRows;
-        }
-      }
-
-      // Render CRM customers
-      function renderCRM(customers) {
-        const grid = document.getElementById('crmGrid');
-        const data = (customers && customers.length) ? customers : DEMO_CUSTOMERS;
-
-        grid.innerHTML = data.map(c => `
-          <div class="customer-card">
-            <div class="name">${c.contact}</div>
-            <div class="company">${c.company}</div>
-            <div style="font-size:0.8rem; color:#4a6a8a;">${c.email}</div>
-            <div class="meta">
-              <span>${c.type}</span>
-              <span>Last: ${c.last}</span>
-              <span class="badge ${c.status === 'active' ? 'success' : 'secondary'}">${c.status}</span>
-            </div>
-          </div>
-        `).join('');
-      }
-
-      // Render WMS inventory
-      function renderWMS(items) {
-        const grid = document.getElementById('wmsGrid');
-        const data = (items && items.length) ? items : DEMO_INVENTORY;
-
-        grid.innerHTML = data.map(i => `
-          <div class="stock-card">
-            <div class="sku">${i.sku}</
-
-
-              // sdksdksldfkjsdoifjsdofisdfoskdfsodfmmsoidfjoifsdif
+            <tr
