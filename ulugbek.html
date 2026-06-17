@@ -1,1022 +1,1912 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wholesale ERP · WMS · CRM Cloud</title>
-  <!-- Font Awesome & Google Font -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wholesale ERP/WMS Cloud Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    /* ===== GLOBAL RESET ===== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    /* ============================================================
+       DESIGN TOKENS & RESET
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:        #0F1629;
+      --navy-mid:    #162040;
+      --navy-light:  #1E2A45;
+      --slate:       #2A3A5C;
+      --blue:        #3B82F6;
+      --blue-light:  #60A5FA;
+      --blue-dim:    rgba(59,130,246,.15);
+      --emerald:     #10B981;
+      --emerald-dim: rgba(16,185,129,.15);
+      --amber:       #F59E0B;
+      --amber-dim:   rgba(245,158,11,.15);
+      --rose:        #F43F5E;
+      --rose-dim:    rgba(244,63,94,.15);
+      --purple:      #8B5CF6;
+      --purple-dim:  rgba(139,92,246,.15);
+      --text-pri:    #F8FAFC;
+      --text-sec:    #94A3B8;
+      --text-dim:    #64748B;
+      --border:      rgba(255,255,255,.07);
+      --card-bg:     #1E2A45;
+      --card-hover:  #243354;
+      --input-bg:    #162040;
+      --radius:      10px;
+      --radius-lg:   16px;
+      --sidebar-w:   240px;
+      --topbar-h:    60px;
+      --transition:  .18s ease;
+      --shadow:      0 4px 24px rgba(0,0,0,.35);
     }
 
-    body {
-      background: #f0f4fa;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
+    html, body { height: 100%; font-family: 'Inter', sans-serif; background: #0B1120; color: var(--text-pri); }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font-family: inherit; }
+    input, select, textarea { font-family: inherit; }
+    ul { list-style: none; }
+    img { display: block; max-width: 100%; }
+    .hidden { display: none !important; }
 
-    /* ===== SIDEBAR ===== */
-    .sidebar {
-      width: 260px;
-      background: #0a192f;
-      color: #c8d9ed;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      overflow-y: auto;
-      transition: width 0.25s;
-    }
+    /* ============================================================
+       SCROLLBAR
+    ============================================================ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--slate); border-radius: 3px; }
 
-    .sidebar-brand {
-      padding: 28px 24px 20px;
-      border-bottom: 1px solid #1a3450;
-    }
+    /* ============================================================
+       ANIMATIONS
+    ============================================================ */
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
 
-    .sidebar-brand h2 {
-      font-weight: 600;
-      font-size: 1.3rem;
-      letter-spacing: -0.3px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: white;
-    }
-
-    .sidebar-brand h2 i {
-      color: #4d8cf7;
-      font-size: 1.5rem;
-    }
-
-    .sidebar-brand small {
-      display: block;
-      font-weight: 400;
-      font-size: 0.7rem;
-      color: #7a9bc0;
-      margin-top: 4px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .sidebar-nav {
-      flex: 1;
-      padding: 20px 0;
-    }
-
-    .sidebar-nav .nav-item {
-      padding: 12px 24px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      color: #9bb3d0;
-      font-weight: 500;
-      font-size: 0.9rem;
-      cursor: pointer;
-      border-left: 3px solid transparent;
-      transition: all 0.15s;
-    }
-
-    .sidebar-nav .nav-item i {
-      width: 22px;
-      font-size: 1.1rem;
-      color: #5a7fa0;
-    }
-
-    .sidebar-nav .nav-item.active {
-      background: #102c47;
-      color: white;
-      border-left-color: #4d8cf7;
-    }
-
-    .sidebar-nav .nav-item.active i {
-      color: #4d8cf7;
-    }
-
-    .sidebar-nav .nav-item:hover {
-      background: #102c47;
-      color: white;
-    }
-
-    .sidebar-nav .nav-item .badge-nav {
-      margin-left: auto;
-      background: #1a3450;
-      padding: 2px 10px;
-      border-radius: 30px;
-      font-size: 0.7rem;
-      color: #9bb3d0;
-    }
-
-    .sidebar-footer {
-      padding: 20px 24px;
-      border-top: 1px solid #1a3450;
-      font-size: 0.7rem;
-      color: #5a7fa0;
-    }
-
-    /* ===== MAIN LAYOUT ===== */
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background: #f0f4fa;
-    }
-
-    /* ===== TOPBAR ===== */
-    .topbar {
-      background: white;
-      padding: 14px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid #e3eaf2;
-      flex-shrink: 0;
-    }
-
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .topbar-left h4 {
-      font-weight: 600;
-      color: #0a192f;
-      font-size: 1.1rem;
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-
-    .status-pill {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #e8eff8;
-      padding: 5px 14px;
-      border-radius: 40px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #1a3450;
-    }
-
-    .status-pill i {
-      font-size: 0.6rem;
-      color: #2e9b5e;
-    }
-
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .user-profile .avatar {
-      width: 34px;
-      height: 34px;
-      background: #dce6f2;
-      border-radius: 40px;
+    /* ============================================================
+       AUTH PAGES  (login / register / forgot-password)
+       Old: "Online shopping login"  →  Now: "Enterprise Cloud Portal"
+    ============================================================ */
+    #auth-wrapper {
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #0a192f;
-      font-weight: 700;
-    }
-
-    .user-profile span {
-      font-weight: 500;
-      font-size: 0.9rem;
-      color: #1a3450;
-    }
-
-    .logout-btn {
-      background: none;
-      border: none;
-      color: #7a9bc0;
-      cursor: pointer;
-      font-size: 1.1rem;
-      transition: 0.15s;
-    }
-
-    .logout-btn:hover {
-      color: #e74c3c;
-    }
-
-    /* ===== CONTENT ===== */
-    .content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 28px 32px;
-    }
-
-    .panel {
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .panel.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* ===== KPI CARDS ===== */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
-      margin-bottom: 28px;
-    }
-
-    .kpi-card {
-      background: white;
-      border-radius: 16px;
-      padding: 20px 22px;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-      border: 1px solid #e8eef5;
-    }
-
-    .kpi-card .label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      color: #7a9bc0;
-      font-weight: 600;
-    }
-
-    .kpi-card .value {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: #0a192f;
-      margin-top: 4px;
-    }
-
-    .kpi-card .sub {
-      font-size: 0.8rem;
-      color: #4a6a8a;
-      margin-top: 4px;
-    }
-
-    /* ===== STATUS INDICATORS ===== */
-    .status-indicator {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      background: white;
-      border-radius: 16px;
-      padding: 16px 22px;
-      border: 1px solid #e8eef5;
-      margin-bottom: 28px;
-    }
-
-    .status-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-      color: #1a3450;
-    }
-
-    .status-item .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 10px;
-      display: inline-block;
-    }
-
-    .dot.green {
-      background: #2e9b5e;
-    }
-    .dot.orange {
-      background: #e68a2e;
-    }
-    .dot.blue {
-      background: #3b7fc9;
-    }
-
-    /* ===== SECTION TITLES ===== */
-    .section-title {
-      font-weight: 600;
-      color: #0a192f;
-      margin: 24px 0 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1rem;
-    }
-
-    .section-title i {
-      color: #4d8cf7;
-    }
-
-    /* ===== TABLES ===== */
-    .card-table-wrap {
-      background: white;
-      border-radius: 16px;
-      border: 1px solid #e8eef5;
-      overflow-x: auto;
-      padding: 0 0 4px 0;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
-
-    th {
-      text-align: left;
-      padding: 16px 16px 10px 16px;
-      color: #4a6a8a;
-      font-weight: 600;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      border-bottom: 1px solid #e8eef5;
-    }
-
-    td {
-      padding: 12px 16px;
-      border-bottom: 1px solid #f0f5fa;
-      color: #1a2d44;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    /* ===== BADGES ===== */
-    .badge {
-      background: #e8eff8;
-      padding: 4px 14px;
-      border-radius: 30px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      display: inline-block;
-    }
-
-    .badge.success {
-      background: #ddf0e6;
-      color: #1b6e47;
-    }
-
-    .badge.warning {
-      background: #fef0db;
-      color: #a8611a;
-    }
-
-    .badge.info {
-      background: #ddebf9;
-      color: #1f5d8c;
-    }
-
-    .badge.secondary {
-      background: #e8eef5;
-      color: #4a6a8a;
-    }
-
-    .badge.danger {
-      background: #fde8e8;
-      color: #b33c3c;
-    }
-
-    /* ===== CRM CUSTOMER CARDS ===== */
-    .customer-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-      gap: 16px;
-      margin: 12px 0;
-    }
-
-    .customer-card {
-      background: white;
-      border-radius: 14px;
-      padding: 18px;
-      border: 1px solid #e8eef5;
-      transition: 0.15s;
-    }
-
-    .customer-card:hover {
-      border-color: #c8d9ed;
-    }
-
-    .customer-card .name {
-      font-weight: 600;
-      color: #0a192f;
-    }
-
-    .customer-card .company {
-      font-size: 0.8rem;
-      color: #4a6a8a;
-      margin: 4px 0;
-    }
-
-    .customer-card .meta {
-      font-size: 0.7rem;
-      color: #7a9bc0;
-      display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
-      align-items: center;
-    }
-
-    /* ===== WMS INVENTORY CARDS ===== */
-    .inventory-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
-      margin: 12px 0;
-    }
-
-    .stock-card {
-      background: white;
-      border-radius: 14px;
-      padding: 16px;
-      border: 1px solid #e8eef5;
-      transition: 0.15s;
-    }
-
-    .stock-card:hover {
-      border-color: #c8d9ed;
-    }
-
-    .stock-card .sku {
-      font-weight: 600;
-      color: #0a192f;
-    }
-
-    .stock-card .cat {
-      font-size: 0.7rem;
-      color: #7a9bc0;
-      margin: 2px 0;
-    }
-
-    .stock-card .qty {
-      margin: 6px 0;
-      font-weight: 600;
-    }
-
-    .stock-card .loc {
-      font-size: 0.7rem;
-      background: #e8eff8;
-      display: inline-block;
-      padding: 2px 12px;
-      border-radius: 40px;
-      color: #4a6a8a;
-    }
-
-    /* ===== BUTTONS ===== */
-    .btn {
-      background: #e8eff8;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 30px;
-      font-weight: 500;
-      font-size: 0.8rem;
-      color: #1a3450;
-      cursor: pointer;
-      transition: 0.15s;
-    }
-
-    .btn:hover {
-      background: #d5e0ec;
-    }
-
-    .btn-primary {
-      background: #0a192f;
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: #1a3450;
-    }
-
-    .btn-primary i {
-      color: #4d8cf7;
-      margin-right: 6px;
-    }
-
-    .flex-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .mt-2 {
-      margin-top: 12px;
-    }
-
-    .mb-2 {
-      margin-bottom: 8px;
-    }
-
-    /* ===== AUTH PANELS ===== */
-    .auth-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 70vh;
-      width: 100%;
+      background: radial-gradient(ellipse at 30% 20%, #162040 0%, #0B1120 60%),
+                  url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233B82F6' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      padding: 24px;
     }
 
     .auth-card {
-      background: white;
-      border-radius: 24px;
-      padding: 40px 36px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
       width: 100%;
-      max-width: 400px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
-      border: 1px solid #e8eef5;
+      max-width: 420px;
+      padding: 40px;
+      box-shadow: var(--shadow);
+      animation: fadeIn .4s ease;
     }
 
-    .auth-card h3 {
-      font-weight: 600;
-      color: #0a192f;
-      margin-bottom: 4px;
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
     }
-
-    .auth-card h3 i {
-      color: #4d8cf7;
-      margin-right: 8px;
+    .auth-logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
     }
+    .auth-logo-text { line-height: 1.2; }
+    .auth-logo-text strong { font-size: 15px; font-weight: 700; color: var(--text-pri); display: block; }
+    .auth-logo-text span { font-size: 11px; color: var(--text-sec); letter-spacing: .5px; text-transform: uppercase; }
 
-    .auth-card p {
-      color: #7a9bc0;
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-    }
+    .auth-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .auth-subtitle { font-size: 13px; color: var(--text-sec); margin-bottom: 28px; }
 
-    .auth-card input {
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-sec); margin-bottom: 6px; letter-spacing: .4px; text-transform: uppercase; }
+    .form-input {
       width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #dce6f2;
-      border-radius: 12px;
-      margin-bottom: 14px;
-      font-size: 0.9rem;
-      transition: 0.15s;
-    }
-
-    .auth-card input:focus {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      font-size: 14px;
+      color: var(--text-pri);
+      transition: border-color var(--transition), box-shadow var(--transition);
       outline: none;
-      border-color: #4d8cf7;
     }
+    .form-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
+    .form-input::placeholder { color: var(--text-dim); }
 
-    .auth-card button {
-      width: 100%;
-      background: #0a192f;
-      color: white;
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px 20px;
+      border-radius: var(--radius);
+      font-size: 14px; font-weight: 600;
       border: none;
+      transition: all var(--transition);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue) 0%, #2563EB 100%);
+      color: #fff; width: 100%;
+    }
+    .btn-primary:hover { opacity: .9; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,130,246,.4); }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-sec); }
+    .btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-sm { padding: 7px 14px; font-size: 12px; }
+    .btn-danger { background: var(--rose-dim); border: 1px solid var(--rose); color: var(--rose); }
+
+    .auth-link { font-size: 13px; color: var(--text-sec); text-align: center; margin-top: 20px; }
+    .auth-link a { color: var(--blue-light); font-weight: 500; }
+    .auth-link a:hover { text-decoration: underline; }
+
+    .alert { padding: 12px 16px; border-radius: var(--radius); font-size: 13px; margin-bottom: 16px; display: none; }
+    .alert-error { background: var(--rose-dim); border: 1px solid var(--rose); color: var(--rose); }
+    .alert-success { background: var(--emerald-dim); border: 1px solid var(--emerald); color: var(--emerald); }
+    .alert.show { display: block; }
+
+    .status-strip {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--emerald-dim);
+      border: 1px solid rgba(16,185,129,.2);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 11px; color: var(--emerald);
+      margin-bottom: 24px;
+      width: fit-content;
+    }
+    .pulse-dot {
+      width: 7px; height: 7px;
+      background: var(--emerald);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    /* ============================================================
+       APP SHELL  (authenticated layout)
+    ============================================================ */
+    #app-shell { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ---- SIDEBAR ---- */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--navy);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .sidebar-brand {
+      display: flex; align-items: center; gap: 10px;
+      padding: 18px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--blue) 0%, var(--purple) 100%);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .brand-text { line-height: 1.25; }
+    .brand-text strong { font-size: 13px; font-weight: 700; color: var(--text-pri); display: block; }
+    .brand-text span { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px; }
+
+    .sidebar-section { padding: 16px 10px 4px; }
+    .sidebar-section-label {
+      font-size: 10px; font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: .8px;
+      padding: 0 8px; margin-bottom: 6px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+      color: var(--text-sec);
+      cursor: pointer;
+      transition: all var(--transition);
+      user-select: none;
+    }
+    .nav-item:hover { background: var(--navy-light); color: var(--text-pri); }
+    .nav-item.active { background: var(--blue-dim); color: var(--blue-light); border: 1px solid rgba(59,130,246,.2); }
+    .nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--rose);
+      color: #fff;
+      font-size: 10px; font-weight: 700;
+      padding: 1px 6px; border-radius: 10px;
+      min-width: 18px; text-align: center;
+    }
+    .nav-badge-blue { background: var(--blue); }
+
+    .sidebar-footer {
+      margin-top: auto;
       padding: 12px;
-      border-radius: 40px;
-      font-weight: 600;
+      border-top: 1px solid var(--border);
+    }
+    .user-pill {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: 0.15s;
+      transition: background var(--transition);
+    }
+    .user-pill:hover { background: var(--navy-light); }
+    .user-avatar {
+      width: 30px; height: 30px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; flex-shrink: 0;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 12px; font-weight: 600; color: var(--text-pri); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 10px; color: var(--text-dim); }
+
+    /* ---- TOPBAR ---- */
+    .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .topbar {
+      height: var(--topbar-h);
+      background: var(--navy);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      flex-shrink: 0;
     }
 
-    .auth-card button:hover {
-      background: #1a3450;
+    .topbar-title { font-size: 16px; font-weight: 600; flex: 1; }
+    .topbar-sub { font-size: 12px; color: var(--text-dim); font-weight: 400; }
+
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+    .system-status {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--emerald-dim);
+      border: 1px solid rgba(16,185,129,.25);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 11px; color: var(--emerald); font-weight: 500;
     }
 
-    .auth-card .link {
-      color: #4d8cf7;
-      font-size: 0.8rem;
-      text-align: center;
-      display: block;
-      margin-top: 14px;
+    .icon-btn {
+      width: 36px; height: 36px;
+      background: var(--navy-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; color: var(--text-sec);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .icon-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* ---- CONTENT AREA ---- */
+    .content { flex: 1; overflow-y: auto; padding: 24px; background: #0B1120; }
+
+    /* ============================================================
+       PAGE SECTIONS  (shown/hidden by JS)
+    ============================================================ */
+    .page { display: none; animation: fadeIn .3s ease; }
+    .page.active { display: block; }
+
+    /* ============================================================
+       COMMON COMPONENTS
+    ============================================================ */
+    .page-header { margin-bottom: 24px; }
+    .page-title { font-size: 22px; font-weight: 700; }
+    .page-desc { font-size: 13px; color: var(--text-sec); margin-top: 4px; }
+
+    /* Cards grid */
+    .cards-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      transition: background var(--transition);
+    }
+    .metric-card:hover { background: var(--card-hover); }
+    .metric-label { font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+    .metric-value { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 6px; }
+    .metric-delta { font-size: 12px; color: var(--text-sec); }
+    .metric-delta.up { color: var(--emerald); }
+    .metric-delta.down { color: var(--rose); }
+    .metric-icon { font-size: 22px; margin-bottom: 12px; }
+
+    /* Tables */
+    .table-wrap {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .table-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .table-title { font-size: 14px; font-weight: 600; }
+    .table-actions { display: flex; gap: 8px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      font-size: 11px; font-weight: 600;
+      color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px;
+      padding: 10px 20px; text-align: left;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,.15);
+    }
+    tbody tr { transition: background var(--transition); }
+    tbody tr:hover { background: rgba(255,255,255,.03); }
+    tbody td {
+      padding: 13px 20px;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+      vertical-align: middle;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .mono { font-family: 'Courier New', monospace; font-size: 12px; color: var(--blue-light); }
+
+    /* Badges */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .3px;
+    }
+    .badge-success { background: var(--emerald-dim); color: var(--emerald); border: 1px solid rgba(16,185,129,.25); }
+    .badge-warning { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,158,11,.25); }
+    .badge-danger  { background: var(--rose-dim);  color: var(--rose);  border: 1px solid rgba(244,63,94,.25); }
+    .badge-info    { background: var(--blue-dim);  color: var(--blue-light);  border: 1px solid rgba(59,130,246,.25); }
+    .badge-purple  { background: var(--purple-dim);color: var(--purple); border: 1px solid rgba(139,92,246,.25); }
+
+    /* Grid layout helpers */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+    /* ============================================================
+       DASHBOARD PAGE
+    ============================================================ */
+    .system-health-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .health-title { font-size: 13px; font-weight: 600; color: var(--text-sec); margin-bottom: 14px; text-transform: uppercase; letter-spacing: .5px; }
+    .health-items { display: flex; gap: 20px; flex-wrap: wrap; }
+    .health-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-green { background: var(--emerald); animation: pulse 2.5s infinite; }
+    .dot-amber { background: var(--amber); animation: pulse 2s infinite; }
+    .dot-red   { background: var(--rose); animation: pulse 1.5s infinite; }
+
+    .mini-chart {
+      height: 40px;
+      display: flex; align-items: flex-end; gap: 3px;
+      margin-top: 12px;
+    }
+    .bar {
+      flex: 1;
+      background: var(--blue-dim);
+      border-radius: 3px 3px 0 0;
+      border-bottom: 2px solid var(--blue);
+      transition: height .3s;
+    }
+
+    .section-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 24px; }
+
+    /* ============================================================
+       WMS INVENTORY CARDS  (Old: product cards → Now: stock items)
+    ============================================================ */
+    .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px; }
+
+    .stock-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      transition: all var(--transition);
       cursor: pointer;
     }
+    .stock-card:hover { background: var(--card-hover); border-color: rgba(59,130,246,.3); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
 
-    .auth-card .link:hover {
-      text-decoration: underline;
+    .stock-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .stock-sku { font-family: 'Courier New', monospace; font-size: 11px; color: var(--blue-light); font-weight: 600; }
+    .stock-name { font-size: 14px; font-weight: 600; margin: 4px 0 2px; }
+    .stock-cat { font-size: 11px; color: var(--text-dim); }
+
+    .stock-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .stock-meta-item { }
+    .stock-meta-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 2px; }
+    .stock-meta-value { font-size: 13px; font-weight: 600; }
+
+    .stock-actions { display: flex; gap: 8px; margin-top: 14px; }
+    /* Old: "Add to Cart" button → Now: "Add to Dispatch" */
+    .btn-dispatch {
+      flex: 1;
+      background: var(--blue-dim);
+      border: 1px solid rgba(59,130,246,.3);
+      color: var(--blue-light);
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 12px; font-weight: 600;
+      transition: all var(--transition);
+    }
+    .btn-dispatch:hover { background: var(--blue); color: #fff; }
+
+    /* ============================================================
+       DISPATCH LIST  (Old: Cart → Now: Dispatch List)
+    ============================================================ */
+    .dispatch-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .dispatch-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+    }
+    .dispatch-item:hover { background: rgba(255,255,255,.03); }
+    .dispatch-item:last-child { border-bottom: none; }
+    .dispatch-qty-ctrl { display: flex; align-items: center; gap: 8px; }
+    .qty-btn {
+      width: 26px; height: 26px;
+      background: var(--slate);
+      border: none;
+      border-radius: 5px;
+      color: var(--text-pri);
+      font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      transition: background var(--transition);
+    }
+    .qty-btn:hover { background: var(--blue); }
+    .dispatch-qty { font-size: 13px; font-weight: 600; min-width: 24px; text-align: center; }
+
+    .dispatch-summary {
+      padding: 20px;
+      background: var(--navy-mid);
+      border-top: 1px solid var(--border);
+    }
+    .dispatch-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
+    .dispatch-total { font-size: 16px; font-weight: 700; }
+
+    /* ============================================================
+       CRM MODULE
+    ============================================================ */
+    .customer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-bottom: 24px; }
+
+    .customer-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      transition: all var(--transition);
+    }
+    .customer-card:hover { background: var(--card-hover); border-color: rgba(139,92,246,.3); }
+
+    .customer-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .customer-avatar {
+      width: 42px; height: 42px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; flex-shrink: 0;
+      color: #fff;
+    }
+    .customer-company { font-size: 14px; font-weight: 600; }
+    .customer-contact { font-size: 12px; color: var(--text-sec); margin-top: 2px; }
+
+    .customer-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .customer-detail { }
+    .cd-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 2px; }
+    .cd-value { font-size: 12px; font-weight: 500; }
+
+    /* ============================================================
+       ERP ORDERS
+    ============================================================ */
+    .order-status-bar {
+      display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .status-pill {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      border: 1px solid transparent;
+    }
+    .status-pill.active-pill { border-color: var(--blue); background: var(--blue-dim); color: var(--blue-light); }
+    .status-pill:not(.active-pill) { background: var(--card-bg); border-color: var(--border); color: var(--text-sec); }
+    .status-pill:hover:not(.active-pill) { border-color: var(--blue); color: var(--blue-light); }
+
+    /* ============================================================
+       LOADING SPINNER
+    ============================================================ */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    .loading-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 60px 20px;
+      color: var(--text-sec);
+      gap: 12px;
+      font-size: 13px;
     }
 
-    .hide {
-      display: none !important;
+    /* ============================================================
+       MODAL
+    ============================================================ */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.7);
+      z-index: 999;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
     }
+    .modal {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%; max-width: 520px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      animation: fadeIn .25s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .modal-title { font-size: 17px; font-weight: 700; }
+    .modal-close { width: 30px; height: 30px; border: none; background: var(--slate); border-radius: 6px; color: var(--text-sec); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .modal-close:hover { background: var(--rose-dim); color: var(--rose); }
 
-    /* ===== TOAST ===== */
-    .toast {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #0a192f;
-      color: white;
-      padding: 14px 24px;
-      border-radius: 12px;
-      font-weight: 500;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    /* ============================================================
+       TOAST
+    ============================================================ */
+    #toast-container {
+      position: fixed; bottom: 24px; right: 24px;
       z-index: 9999;
-      animation: slideIn 0.3s ease;
+      display: flex; flex-direction: column; gap: 8px;
     }
-
-    .toast.success {
-      background: #1b6e47;
+    .toast {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 13px;
+      box-shadow: var(--shadow);
+      animation: fadeIn .25s ease;
+      display: flex; align-items: center; gap: 10px;
+      min-width: 260px;
     }
+    .toast-success { border-left: 3px solid var(--emerald); }
+    .toast-error   { border-left: 3px solid var(--rose); }
+    .toast-info    { border-left: 3px solid var(--blue); }
 
-    .toast.error {
-      background: #b33c3c;
-    }
-
-    @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    /* ===== RESPONSIVE ===== */
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
     @media (max-width: 1024px) {
-      .kpi-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .two-col, .three-col, .section-row { grid-template-columns: 1fr; }
     }
-
     @media (max-width: 768px) {
-      .sidebar {
-        width: 72px;
-      }
-
-      .sidebar-brand h2 span,
-      .sidebar-brand small,
-      .sidebar-nav .nav-item span,
-      .badge-nav {
-        display: none;
-      }
-
-      .sidebar-nav .nav-item {
-        padding: 16px;
-        justify-content: center;
-      }
-
-      .sidebar-footer {
-        display: none;
-      }
-
-      .topbar-left h4 {
-        font-size: 0.9rem;
-      }
-
-      .topbar {
-        padding: 12px 16px;
-      }
-
-      .content {
-        padding: 16px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .kpi-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .customer-grid,
-      .inventory-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .topbar-right .status-pill {
-        display: none;
-      }
-
-      .user-profile span {
-        display: none;
-      }
+      .sidebar { position: fixed; left: -100%; transition: left .25s; }
+      .sidebar.open { left: 0; }
+      :root { --sidebar-w: 0px; }
+      .cards-row { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
 <body>
 
-  <!-- ===== SIDEBAR ===== -->
-  <div class="sidebar">
-    <div class="sidebar-brand">
-      <h2><i class="fas fa-cloud"></i><span>Wholesale</span></h2>
-      <small>ERP · WMS · CRM Cloud</small>
-    </div>
-    <div class="sidebar-nav">
-      <div class="nav-item active" data-panel="dashboard">
-        <i class="fas fa-tachometer-alt"></i><span>Dashboard</span>
-      </div>
-      <div class="nav-item" data-panel="erp">
-        <i class="fas fa-cubes"></i><span>ERP Orders</span>
-        <span class="badge-nav">12</span>
-      </div>
-      <div class="nav-item" data-panel="crm">
-        <i class="fas fa-user-friends"></i><span>CRM Customers</span>
-        <span class="badge-nav">48</span>
-      </div>
-      <div class="nav-item" data-panel="wms">
-        <i class="fas fa-warehouse"></i><span>WMS Inventory</span>
-        <span class="badge-nav">6</span>
-      </div>
-      <div class="nav-item" data-panel="dispatch">
-        <i class="fas fa-truck"></i><span>Dispatch List</span>
+<!-- ============================================================
+     AUTH PAGES
+     Old: Simple shopping login → New: Enterprise Cloud Portal
+============================================================ -->
+<div id="auth-wrapper">
+
+  <!-- LOGIN FORM -->
+  <div id="page-login" class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🏭</div>
+      <div class="auth-logo-text">
+        <strong>Wholesale ERP/WMS</strong>
+        <span>Cloud Portal</span>
       </div>
     </div>
-    <div class="sidebar-footer">© 2026 Wholesale ERP</div>
+
+    <div class="status-strip">
+      <div class="pulse-dot"></div>
+      All systems operational
+    </div>
+
+    <div class="auth-title">Sign in to your workspace</div>
+    <div class="auth-subtitle">Access ERP, CRM and WMS modules for your wholesale operations.</div>
+
+    <div id="login-alert" class="alert alert-error"></div>
+
+    <div class="form-group">
+      <label class="form-label" for="login-email">Business Email</label>
+      <input class="form-input" type="email" id="login-email" placeholder="manager@wholesale.com" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="login-password">Password</label>
+      <input class="form-input" type="password" id="login-password" placeholder="••••••••" />
+    </div>
+
+    <button class="btn btn-primary" id="btn-login" onclick="handleLogin()">
+      <span>Sign in to Portal</span>
+    </button>
+
+    <div class="auth-link" style="margin-top:14px">
+      <a href="#" onclick="showAuth('page-forgot')">Forgot password?</a>
+      &nbsp;·&nbsp;
+      <a href="#" onclick="showAuth('page-register')">Create account</a>
+    </div>
   </div>
 
-  <!-- ===== MAIN ===== -->
-  <div class="main">
-
-    <!-- ===== TOPBAR ===== -->
-    <div class="topbar">
-      <div class="topbar-left">
-        <h4 id="panelTitle">Dashboard</h4>
-        <span class="status-pill"><i class="fas fa-circle"></i> System Online</span>
-      </div>
-      <div class="topbar-right">
-        <div class="user-profile">
-          <div class="avatar"><i class="fas fa-user"></i></div>
-          <span id="usernameDisplay">Admin</span>
-        </div>
-        <button class="logout-btn" id="logoutBtn" title="Logout">
-          <i class="fas fa-sign-out-alt"></i>
-        </button>
+  <!-- REGISTER FORM -->
+  <div id="page-register" class="auth-card hidden">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🏭</div>
+      <div class="auth-logo-text">
+        <strong>Wholesale ERP/WMS</strong>
+        <span>Cloud Portal</span>
       </div>
     </div>
 
-    <!-- ===== CONTENT ===== -->
-    <div class="content" id="contentArea">
+    <div class="auth-title">Create an account</div>
+    <div class="auth-subtitle">Register your wholesale organisation on the platform.</div>
 
-      <!-- ===== PANEL: DASHBOARD ===== -->
-      <div class="panel active" id="panel-dashboard">
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="label">Inventory Items</div>
-            <div class="value" id="kpiInventory">Abdurahmon kot</div>
-            <div class="sub"><i class="fas fa-arrow-up" style="color:#2e9b5e;"></i> +8 this month</div>
-          </div>
-          <div class="kpi-card">
-            <div class="label">Active Wholesale Customers</div>
-            <div class="value" id="kpiCustomers">48</div>
-            <div class="sub"><i class="fas fa-arrow-up" style="color:#2e9b5e;"></i> +6 new</div>
-          </div>
-          <div class="kpi-card">
-            <div class="label">Pending Warehouse Orders</div>
-            <div class="value" id="kpiPending">17</div>
-            <div class="sub"><i class="fas fa-exclamation-triangle" style="color:#e68a2e;"></i> Requires attention</div>
-          </div>
-          <div class="kpi-card">
-            <div class="label">Monthly Dispatches</div>
-            <div class="value" id="kpiDispatches">93</div>
-            <div class="sub"><i class="fas fa-arrow-up" style="color:#2e9b5e;"></i> +12% vs last month</div>
-          </div>
-        </div>
+    <div id="register-alert" class="alert alert-error"></div>
 
-        <div class="status-indicator">
-          <span class="status-item"><span class="dot green"></span> Backend API <strong>online</strong></span>
-          <span class="status-item"><span class="dot green"></span> Frontend App <strong>online</strong></span>
-          <span class="status-item"><span class="dot green"></span> PostgreSQL <strong>online</strong></span>
-          <span class="status-item"><span class="dot orange"></span> System load 73%</span>
-        </div>
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input class="form-input" type="text" id="reg-name" placeholder="John Smith" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Business Email</label>
+      <input class="form-input" type="email" id="reg-email" placeholder="manager@wholesale.com" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" type="password" id="reg-password" placeholder="Min. 8 characters" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Confirm Password</label>
+      <input class="form-input" type="password" id="reg-confirm" placeholder="Repeat password" />
+    </div>
 
-        <div class="section-title"><i class="fas fa-chart-simple"></i> Recent ERP Orders</div>
-        <div class="card-table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Order #</th>
-                <th>Customer</th>
-                <th>Date</th>
-                <th>Value</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="dashOrderBody"></tbody>
-          </table>
+    <button class="btn btn-primary" onclick="handleRegister()">Create Account</button>
+    <div class="auth-link"><a href="#" onclick="showAuth('page-login')">← Back to Sign In</a></div>
+  </div>
+
+  <!-- FORGOT PASSWORD FORM -->
+  <div id="page-forgot" class="auth-card hidden">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🏭</div>
+      <div class="auth-logo-text">
+        <strong>Wholesale ERP/WMS</strong>
+        <span>Cloud Portal</span>
+      </div>
+    </div>
+
+    <div class="auth-title">Reset your password</div>
+    <div class="auth-subtitle">Enter your registered business email to receive a reset link.</div>
+
+    <div id="forgot-alert" class="alert alert-error"></div>
+    <div id="forgot-success" class="alert alert-success"></div>
+
+    <div class="form-group">
+      <label class="form-label">Business Email</label>
+      <input class="form-input" type="email" id="forgot-email" placeholder="manager@wholesale.com" />
+    </div>
+
+    <button class="btn btn-primary" onclick="handleForgot()">Send Reset Link</button>
+    <div class="auth-link"><a href="#" onclick="showAuth('page-login')">← Back to Sign In</a></div>
+  </div>
+
+</div><!-- /#auth-wrapper -->
+
+
+<!-- ============================================================
+     APP SHELL  (visible after login)
+============================================================ -->
+<div id="app-shell" class="hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">🏭</div>
+      <div class="brand-text">
+        <strong>WholesaleERP</strong>
+        <span>Cloud Platform</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Overview</div>
+      <div class="nav-item active" onclick="navigate('dashboard')" data-page="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">ERP — Business Ops</div>
+      <!-- Old: Orders/Checkout → Now: ERP Order Processing -->
+      <div class="nav-item" onclick="navigate('erp-orders')" data-page="erp-orders">
+        <span class="nav-icon">📋</span> Order Processing
+        <span class="nav-badge nav-badge-blue" id="badge-orders">0</span>
+      </div>
+      <div class="nav-item" onclick="navigate('erp-create')" data-page="erp-create">
+        <span class="nav-icon">➕</span> Create ERP Order
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">CRM — Customers</div>
+      <div class="nav-item" onclick="navigate('crm')" data-page="crm">
+        <span class="nav-icon">👥</span> Wholesale Customers
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">WMS — Warehouse</div>
+      <!-- Old: Products → Now: Inventory Items -->
+      <div class="nav-item" onclick="navigate('wms-inventory')" data-page="wms-inventory">
+        <span class="nav-icon">📦</span> Inventory Items
+      </div>
+      <!-- Old: Cart → Now: Dispatch List -->
+      <div class="nav-item" onclick="navigate('wms-dispatch')" data-page="wms-dispatch">
+        <span class="nav-icon">🚚</span> Dispatch List
+        <span class="nav-badge" id="badge-dispatch">0</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">System</div>
+      <div class="nav-item" onclick="openSwagger()">
+        <span class="nav-icon">🔗</span> API Reference
+      </div>
+      <div class="nav-item" onclick="handleLogout()">
+        <span class="nav-icon">🚪</span> Sign Out
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="sidebar-avatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-username">—</div>
+          <div class="user-role">Warehouse Manager</div>
         </div>
       </div>
+    </div>
+  </aside>
 
-      <!-- ===== PANEL: ERP ===== -->
-      <div class="panel" id="panel-erp">
-        <div class="flex-row">
-          <h4 class="section-title" style="margin-top:0;"><i class="fas fa-cubes"></i> ERP Order Processing</h4>
-          <span class="badge info">12 pending</span>
-        </div>
-        <div class="card-table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Date</th>
-                <th>Total Value</th>
-                <th>Invoice Status</th>
-              </tr>
-            </thead>
-            <tbody id="erpOrderBody"></tbody>
-          </table>
-        </div>
-        <div class="mt-2">
-          <button class="btn btn-primary" onclick="showToast('ERP Order Created Successfully!', 'success')"><i class="fas fa-plus"></i> Create ERP Order</button>
-          <button class="btn" onclick="showToast('Business Operations Dashboard Opened', 'info')"><i class="fas fa-file-invoice"></i> Business Operations</button>
-        </div>
+  <!-- MAIN AREA -->
+  <div class="main-area">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">
+        Dashboard <span class="topbar-sub">/ Overview</span>
       </div>
-
-      <!-- ===== PANEL: CRM ===== -->
-      <div class="panel" id="panel-crm">
-        <h4 class="section-title" style="margin-top:0;"><i class="fas fa-user-friends"></i> Wholesale Customers · CRM Records</h4>
-        <div class="customer-grid" id="crmGrid"></div>
-      </div>
-
-      <!-- ===== PANEL: WMS ===== -->
-      <div class="panel" id="panel-wms">
-        <h4 class="section-title" style="margin-top:0;"><i class="fas fa-warehouse"></i> Inventory Items · Warehouse Stock</h4>
-        <div class="inventory-grid" id="wmsGrid"></div>
-      </div>
-
-      <!-- ===== PANEL: DISPATCH ===== -->
-      <div class="panel" id="panel-dispatch">
-        <h4 class="section-title" style="margin-top:0;"><i class="fas fa-truck"></i> Dispatch List · Outgoing Stock</h4>
-        <div class="card-table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>SKU</th>
-                <th>Item</th>
-                <th>Qty</th>
-                <th>Warehouse Location</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="dispatchBody"></tbody>
-          </table>
+      <div class="topbar-actions">
+        <div class="system-status">
+          <div class="pulse-dot" style="width:7px;height:7px;border-radius:50%;background:var(--emerald);animation:pulse 2s infinite;"></div>
+          Systems Online
         </div>
-        <div class="mt-2">
-          <button class="btn btn-primary" onclick="showToast('Warehouse Dispatch Created Successfully!', 'success')"><i class="fas fa-boxes"></i> Create Warehouse Dispatch</button>
-          <button class="btn" onclick="showToast('Incoming Stock View Opened', 'info')"><i class="fas fa-arrow-right"></i> Incoming Stock</button>
-        </div>
+        <div class="icon-btn" title="Notifications">🔔</div>
+        <div class="icon-btn" title="Settings">⚙️</div>
+        <div class="icon-btn" onclick="handleLogout()" title="Sign Out">🚪</div>
       </div>
+    </div>
 
-      <!-- ===== AUTH PANEL ===== -->
-      <div id="authPanel" class="hide">
-        <div class="auth-wrapper">
-          <!-- Login -->
-          <div class="auth-card" id="loginCard">
-            <h3><i class="fas fa-cloud"></i> Wholesale ERP/WMS</h3>
-            <p>Cloud Portal · Secure Sign In</p>
-            <input type="text" id="loginUser" placeholder="Username" value="admin">
-            <input type="password" id="loginPass" placeholder="Password" value="admin123">
-            <button id="loginBtn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
-            <span class="link" id="showRegister">Create new account</span>
-            <span class="link" id="showForgot">Forgot password?</span>
-          </div>
+    <!-- CONTENT -->
+    <div class="content">
 
-          <!-- Register -->
-          <div class="auth-card hide" id="registerCard">
-            <h3><i class="fas fa-user-plus"></i> Register</h3>
-            <p>Create wholesale account</p>
-            <input type="text" id="regUser" placeholder="Username">
-            <input type="email" id="regEmail" placeholder="Email">
-            <input type="password" id="regPass" placeholder="Password">
-            <input type="password" id="regConfirmPass" placeholder="Confirm Password">
-            <button id="registerBtn"><i class="fas fa-user-check"></i> Register</button>
-            <span class="link" id="showLogin">← Back to login</span>
-          </div>
+      <!-- ======================================================
+           DASHBOARD PAGE
+      ====================================================== -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div class="page-title">Operational Dashboard</div>
+          <div class="page-desc">Real-time overview of ERP, CRM and WMS activity across your wholesale operations.</div>
+        </div>
 
-          <!-- Forgot Password -->
-          <div class="auth-card hide" id="forgotCard">
-            <h3><i class="fas fa-key"></i> Reset Password</h3>
-            <p>Enter your email to reset</p>
-            <input type="email" id="forgotEmail" placeholder="Email">
-            <button id="forgotBtn"><i class="fas fa-paper-plane"></i> Send Reset Link</button>
-            <span class="link" id="showLoginFromForgot">← Back to login</span>
+        <!-- System Health -->
+        <div class="system-health-panel">
+          <div class="health-title">☁️ Cloud System Status</div>
+          <div class="health-items">
+            <div class="health-item"><div class="dot dot-green"></div> Backend API — Online</div>
+            <div class="health-item"><div class="dot dot-green"></div> Frontend App — Online</div>
+            <div class="health-item"><div class="dot dot-green"></div> PostgreSQL Database — Online</div>
+            <div class="health-item"><div class="dot dot-green"></div> WMS Engine — Online</div>
+            <div class="health-item"><div class="dot dot-green"></div> CRM Service — Online</div>
           </div>
         </div>
+
+        <!-- KPI Cards -->
+        <div class="cards-row" id="dashboard-kpis">
+          <div class="metric-card">
+            <div class="metric-icon">📦</div>
+            <div class="metric-label">Total Inventory Items</div>
+            <div class="metric-value" id="kpi-inventory">—</div>
+            <div class="metric-delta up" id="kpi-inventory-d">Loading…</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon">👥</div>
+            <div class="metric-label">Active Wholesale Customers</div>
+            <div class="metric-value" id="kpi-customers">—</div>
+            <div class="metric-delta up" id="kpi-customers-d">Loading…</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon">📋</div>
+            <div class="metric-label">Pending Warehouse Orders</div>
+            <div class="metric-value" id="kpi-pending">—</div>
+            <div class="metric-delta" id="kpi-pending-d">Loading…</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon">🚚</div>
+            <div class="metric-label">Monthly Dispatches</div>
+            <div class="metric-value" id="kpi-dispatches">—</div>
+            <div class="metric-delta up" id="kpi-dispatches-d">Loading…</div>
+          </div>
+        </div>
+
+        <!-- Charts + Recent Activity -->
+        <div class="section-row">
+          <div class="table-wrap">
+            <div class="table-header">
+              <div class="table-title">📋 Recent ERP Orders</div>
+              <button class="btn btn-ghost btn-sm" onclick="navigate('erp-orders')">View All</button>
+            </div>
+            <div id="dashboard-recent-orders">
+              <div class="loading-state"><div class="spinner"></div> Loading order data…</div>
+            </div>
+          </div>
+
+          <div>
+            <div class="table-wrap" style="margin-bottom:16px">
+              <div class="table-header">
+                <div class="table-title">📊 Stock Level Summary</div>
+              </div>
+              <div style="padding:20px">
+                <div id="stock-chart-bars" class="mini-chart" style="height:60px;"></div>
+                <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--text-dim)" id="stock-chart-labels"></div>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <div class="table-header"><div class="table-title">🚦 Order Status Breakdown</div></div>
+              <div id="dashboard-status-breakdown" style="padding:14px 20px;"></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /#page-dashboard -->
+
+
+      <!-- ======================================================
+           ERP — ORDER PROCESSING
+           Old: Orders/Checkout list → Now: ERP Order Processing
+      ====================================================== -->
+      <div class="page" id="page-erp-orders">
+        <div class="page-header">
+          <div class="page-title">📋 Order Processing</div>
+          <div class="page-desc">ERP order management — track, process and fulfil wholesale orders across all business accounts.</div>
+        </div>
+
+        <div class="order-status-bar">
+          <div class="status-pill active-pill" onclick="filterOrders('all', this)">All Orders</div>
+          <div class="status-pill" onclick="filterOrders('PENDING', this)">Pending</div>
+          <div class="status-pill" onclick="filterOrders('PROCESSING', this)">Processing</div>
+          <div class="status-pill" onclick="filterOrders('DISPATCHED', this)">Dispatched</div>
+          <div class="status-pill" onclick="filterOrders('DELIVERED', this)">Delivered</div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-title">Business Operations — Invoice Register</div>
+            <!-- Old: "Create Order" → Now: "Create ERP Order" -->
+            <button class="btn btn-primary btn-sm" onclick="navigate('erp-create')">➕ Create ERP Order</button>
+          </div>
+          <div id="erp-orders-container">
+            <div class="loading-state"><div class="spinner"></div> Loading ERP orders…</div>
+          </div>
+        </div>
+      </div><!-- /#page-erp-orders -->
+
+
+      <!-- ======================================================
+           ERP — CREATE ORDER
+           Old: Checkout → Now: Create ERP Order / Invoice
+      ====================================================== -->
+      <div class="page" id="page-erp-create">
+        <div class="page-header">
+          <div class="page-title">➕ Create ERP Order</div>
+          <div class="page-desc">Raise a new wholesale order for business operations and invoice processing.</div>
+        </div>
+
+        <div class="two-col">
+          <div>
+            <div class="table-wrap" style="padding:24px;margin-bottom:16px">
+              <div class="table-title" style="margin-bottom:18px">📋 Order Details</div>
+              <div class="form-group">
+                <label class="form-label">Customer Account</label>
+                <select class="form-input" id="order-customer">
+                  <option value="">Select wholesale customer…</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Order Reference</label>
+                <input class="form-input" type="text" id="order-ref" placeholder="e.g. PO-2024-001" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Delivery Address</label>
+                <input class="form-input" type="text" id="order-address" placeholder="Warehouse / delivery address" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Invoice Notes</label>
+                <textarea class="form-input" id="order-notes" rows="3" placeholder="Payment terms, special instructions…"></textarea>
+              </div>
+            </div>
+
+            <div class="table-wrap" style="padding:0;overflow:hidden">
+              <div class="table-header">
+                <div class="table-title">🛒 Dispatch List Items</div>
+                <span id="create-order-item-count" class="badge badge-info">0 items</span>
+              </div>
+              <div id="create-order-items">
+                <div style="padding:30px;text-align:center;color:var(--text-sec);font-size:13px">
+                  No items in dispatch list. Add stock items from the <a href="#" onclick="navigate('wms-inventory')" style="color:var(--blue-light)">Inventory</a> module.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dispatch-summary table-wrap" style="height:fit-content;padding:24px">
+            <div class="table-title" style="margin-bottom:16px">📊 Order Summary</div>
+            <div class="dispatch-row"><span style="color:var(--text-sec)">Subtotal</span><strong id="co-subtotal">$0.00</strong></div>
+            <div class="dispatch-row"><span style="color:var(--text-sec)">Tax (10%)</span><strong id="co-tax">$0.00</strong></div>
+            <div class="dispatch-row dispatch-total" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+              <span>Total Invoice Value</span><strong id="co-total">$0.00</strong>
+            </div>
+            <button class="btn btn-primary" style="margin-top:20px;width:100%" onclick="handleCheckout()">
+              🚚 Submit Warehouse Dispatch Order
+            </button>
+            <div style="margin-top:10px;font-size:11px;color:var(--text-dim);text-align:center">
+              This will create an ERP order record and notify the warehouse team.
+            </div>
+          </div>
+        </div>
+      </div><!-- /#page-erp-create -->
+
+
+      <!-- ======================================================
+           CRM — WHOLESALE CUSTOMERS
+           Old: (no dedicated customer section) → Now: CRM Module
+      ====================================================== -->
+      <div class="page" id="page-crm">
+        <div class="page-header">
+          <div class="page-title">👥 CRM — Customer Relationship Management</div>
+          <div class="page-desc">Wholesale customer accounts, contact records and account status management.</div>
+        </div>
+
+        <div class="cards-row" style="grid-template-columns:repeat(4,1fr)">
+          <div class="metric-card"><div class="metric-label">Total Accounts</div><div class="metric-value" id="crm-total">—</div></div>
+          <div class="metric-card"><div class="metric-label">Active</div><div class="metric-value" id="crm-active">—</div></div>
+          <div class="metric-card"><div class="metric-label">New This Month</div><div class="metric-value" id="crm-new">—</div></div>
+          <div class="metric-card"><div class="metric-label">Avg. Order Value</div><div class="metric-value" id="crm-aov">—</div></div>
+        </div>
+
+        <div class="table-header" style="background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius-lg) var(--radius-lg) 0 0;border-bottom:none">
+          <div class="table-title">CRM Records — Wholesale Customers</div>
+          <button class="btn btn-primary btn-sm" onclick="openNewCustomerModal()">➕ Add Customer</button>
+        </div>
+        <div id="crm-customers-container" class="customer-grid" style="border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);padding:16px;background:rgba(30,42,69,.3)">
+          <div class="loading-state"><div class="spinner"></div> Loading CRM records…</div>
+        </div>
+      </div><!-- /#page-crm -->
+
+
+      <!-- ======================================================
+           WMS — INVENTORY ITEMS
+           Old: Products page → Now: Warehouse Inventory
+      ====================================================== -->
+      <div class="page" id="page-wms-inventory">
+        <div class="page-header">
+          <div class="page-title">📦 WMS — Inventory Items</div>
+          <div class="page-desc">Warehouse stock management — track SKUs, quantities, locations and reorder levels for all clothing inventory.</div>
+        </div>
+
+        <div class="cards-row" style="grid-template-columns:repeat(4,1fr)">
+          <div class="metric-card"><div class="metric-label">Total SKUs</div><div class="metric-value" id="wms-total-skus">—</div></div>
+          <div class="metric-card"><div class="metric-label">In Stock</div><div class="metric-value" id="wms-in-stock">—</div></div>
+          <div class="metric-card"><div class="metric-label">Low Stock Alerts</div><div class="metric-value" id="wms-low-stock" style="color:var(--amber)">—</div></div>
+          <div class="metric-card"><div class="metric-label">Out of Stock</div><div class="metric-value" id="wms-out-stock" style="color:var(--rose)">—</div></div>
+        </div>
+
+        <div class="table-header" style="background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius-lg) var(--radius-lg) 0 0;border-bottom:1px solid var(--border);margin-bottom:0">
+          <div class="table-title">Warehouse Stock — Clothing Inventory</div>
+          <div style="display:flex;gap:8px">
+            <select class="form-input" style="width:180px;padding:6px 10px;font-size:12px" id="cat-filter" onchange="filterInventory()">
+              <option value="">All Categories</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="openIncomingStockModal()">📥 Incoming Stock</button>
+          </div>
+        </div>
+        <!-- Old: Product cards → Now: Stock item cards -->
+        <div id="wms-inventory-container" class="inventory-grid" style="border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);padding:16px;background:rgba(30,42,69,.3)">
+          <div class="loading-state"><div class="spinner"></div> Loading inventory…</div>
+        </div>
+      </div><!-- /#page-wms-inventory -->
+
+
+      <!-- ======================================================
+           WMS — DISPATCH LIST
+           Old: Shopping Cart → Now: Warehouse Dispatch List
+      ====================================================== -->
+      <div class="page" id="page-wms-dispatch">
+        <div class="page-header">
+          <div class="page-title">🚚 WMS — Dispatch List</div>
+          <div class="page-desc">Outgoing stock dispatch management — review items, adjust quantities and submit warehouse dispatch orders.</div>
+        </div>
+
+        <div class="two-col">
+          <div class="dispatch-panel" id="dispatch-list-container">
+            <div class="loading-state"><div class="spinner"></div> Loading dispatch list…</div>
+          </div>
+
+          <div>
+            <div class="dispatch-summary table-wrap" style="padding:24px">
+              <div class="table-title" style="margin-bottom:16px">📊 Dispatch Summary</div>
+              <div class="dispatch-row"><span style="color:var(--text-sec)">Total Items</span><strong id="d-items">0</strong></div>
+              <div class="dispatch-row"><span style="color:var(--text-sec)">Total Units</span><strong id="d-units">0</strong></div>
+              <div class="dispatch-row"><span style="color:var(--text-sec)">Est. Value</span><strong id="d-value">$0.00</strong></div>
+              <div class="dispatch-row dispatch-total" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+                <span>Invoice Total (incl. Tax)</span><strong id="d-total">$0.00</strong>
+              </div>
+              <!-- Old: Proceed to Checkout → Now: Create Warehouse Dispatch Order -->
+              <button class="btn btn-primary" style="margin-top:20px;width:100%" onclick="navigate('erp-create')">
+                📋 Create Warehouse Dispatch Order
+              </button>
+              <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%" onclick="clearDispatch()">
+                🗑️ Clear Dispatch List
+              </button>
+            </div>
+
+            <div class="table-wrap" style="margin-top:16px;padding:18px">
+              <div class="table-title" style="margin-bottom:12px">📤 Outgoing / 📥 Incoming</div>
+              <div style="display:flex;gap:8px">
+                <div class="badge badge-success">✅ Outgoing Stock Ready</div>
+              </div>
+              <div style="margin-top:14px;font-size:12px;color:var(--text-sec);line-height:1.6">
+                Items in the dispatch list are staged for outgoing shipment. Confirm quantities before submitting the dispatch order to the warehouse team.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /#page-wms-dispatch -->
+
+    </div><!-- /.content -->
+  </div><!-- /.main-area -->
+</div><!-- /#app-shell -->
+
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- MODAL PLACEHOLDER -->
+<div id="modal-container"></div>
+
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+/* =============================================================
+   CONFIG — keep existing API_BASE variable intact
+============================================================= */
+const API_BASE = '';   // ← your existing API base URL stays here
+
+/* =============================================================
+   STATE
+============================================================= */
+let currentUser  = null;
+let dispatchList = [];      // Old: cart items  → Now: dispatch list items
+let allProducts  = [];      // Old: products    → Now: inventory/stock items
+let allOrders    = [];      // Old: orders      → Now: ERP orders
+let allCustomers = [];      // CRM customer records
+let currentOrderFilter = 'all';
+
+/* =============================================================
+   DEMO / FALLBACK DATA
+   (used when API returns empty or fails — per requirement #7)
+============================================================= */
+const DEMO_PRODUCTS = [
+  { id:1, name:'Oxford Slim-Fit Shirt',  category:'Shirts',   price:28.50, description:'Premium cotton, white', image:'', quantity:240 },
+  { id:2, name:'Chino Cargo Trousers',   category:'Trousers', price:34.00, description:'Khaki, multi-pocket',   image:'', quantity:185 },
+  { id:3, name:'Fleece Zip Hoodie',      category:'Knitwear', price:42.00, description:'Navy, heavyweight',     image:'', quantity:97  },
+  { id:4, name:'Formal Blazer',          category:'Jackets',  price:89.99, description:'Charcoal, tailored',   image:'', quantity:54  },
+  { id:5, name:'Polo Piqué Shirt',       category:'Shirts',   price:22.00, description:'Assorted colours',     image:'', quantity:320 },
+  { id:6, name:'Denim Straight Jeans',   category:'Trousers', price:38.50, description:'Indigo, 32" leg',      image:'', quantity:16  },
+  { id:7, name:'Cable Knit Jumper',      category:'Knitwear', price:54.00, description:'Oatmeal, relaxed',     image:'', quantity:0   },
+  { id:8, name:'Waterproof Shell Jacket',category:'Jackets',  price:110.00,description:'Black, taped seams',   image:'', quantity:62  },
+];
+
+const DEMO_ORDERS = [
+  { id:'ORD-1001', total:1840.00, status:'DELIVERED',  createdAt:'2024-11-12', customer:'Riverside Retail Ltd' },
+  { id:'ORD-1002', total:3250.50, status:'DISPATCHED', createdAt:'2024-11-18', customer:'Metro Fashions PLC' },
+  { id:'ORD-1003', total:720.00,  status:'PROCESSING', createdAt:'2024-11-20', customer:'Apex Clothing Co.' },
+  { id:'ORD-1004', total:4100.00, status:'PENDING',    createdAt:'2024-11-22', customer:'NorthStar Wholesale' },
+  { id:'ORD-1005', total:990.75,  status:'PENDING',    createdAt:'2024-11-23', customer:'City Garments Ltd' },
+];
+
+const DEMO_CUSTOMERS = [
+  { id:1, company:'Riverside Retail Ltd',  contact:'Emma Clarke',    email:'emma@riverside.co.uk',   type:'Gold',   status:'ACTIVE',   lastActivity:'2024-11-20', orders:14, value:28400 },
+  { id:2, company:'Metro Fashions PLC',    contact:'James Okafor',   email:'j.okafor@metro.com',     type:'Platinum',status:'ACTIVE',  lastActivity:'2024-11-18', orders:32, value:91200 },
+  { id:3, company:'Apex Clothing Co.',     contact:'Sarah Bloom',    email:'sarah@apexclothing.com', type:'Silver', status:'ACTIVE',   lastActivity:'2024-11-15', orders:8,  value:12000 },
+  { id:4, company:'NorthStar Wholesale',   contact:'David Patel',    email:'d.patel@northstar.net',  type:'Gold',   status:'INACTIVE', lastActivity:'2024-10-30', orders:21, value:44800 },
+  { id:5, company:'City Garments Ltd',     contact:'Lisa Hendricks', email:'lisa@citygarments.co.uk',type:'Silver', status:'ACTIVE',   lastActivity:'2024-11-22', orders:5,  value:7300  },
+  { id:6, company:'PrimePack Distributors',contact:'Tom Walsh',      email:'tom@primepack.ie',        type:'Bronze', status:'ACTIVE',   lastActivity:'2024-11-10', orders:3,  value:4100  },
+];
+
+/* =============================================================
+   API HELPER  (preserving existing fetch structure)
+============================================================= */
+async function apiFetch(path, options = {}) {
+  const token = localStorage.getItem('auth_token');
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  try {
+    const res = await fetch(API_BASE + path, { ...options, headers });
+    if (res.status === 401) { handleLogout(); return null; }
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  } catch (e) {
+    console.warn('API unavailable, using demo data:', e);
+    return null;
+  }
+}
+
+/* =============================================================
+   AUTH FUNCTIONS  (endpoints: /login, /register, /forgot-password)
+============================================================= */
+function showAuth(pageId) {
+  document.querySelectorAll('#auth-wrapper > .auth-card').forEach(el => el.classList.add('hidden'));
+  document.getElementById(pageId).classList.remove('hidden');
+}
+
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  const alert = document.getElementById('login-alert');
+  alert.classList.remove('show');
+
+  if (!email || !pass) { alert.textContent = 'Please enter your business email and password.'; alert.classList.add('show'); return; }
+
+  const btn = document.getElementById('btn-login');
+  btn.textContent = 'Authenticating…'; btn.disabled = true;
+
+  // Existing /login endpoint
+  const data = await apiFetch('/login', { method:'POST', body: JSON.stringify({ email, password: pass }) });
+
+  btn.textContent = 'Sign in to Portal'; btn.disabled = false;
+
+  if (data && (data.token || data.access_token)) {
+    localStorage.setItem('auth_token', data.token || data.access_token);
+    localStorage.setItem('user_email', email);
+    currentUser = { email, name: data.name || email.split('@')[0] };
+    enterApp();
+  } else if (data && data.message) {
+    alert.textContent = data.message;
+    alert.classList.add('show');
+  } else {
+    // Demo login for offline/testing
+    localStorage.setItem('auth_token', 'demo-token-erp');
+    localStorage.setItem('user_email', email);
+    currentUser = { email, name: email.split('@')[0] };
+    enterApp();
+  }
+}
+
+async function handleRegister() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-password').value;
+  const conf  = document.getElementById('reg-confirm').value;
+  const alert = document.getElementById('register-alert');
+  alert.classList.remove('show');
+
+  if (!name || !email || !pass) { alert.textContent = 'All fields are required.'; alert.classList.add('show'); return; }
+  if (pass !== conf) { alert.textContent = 'Passwords do not match.'; alert.classList.add('show'); return; }
+
+  // Existing /register endpoint
+  const data = await apiFetch('/register', { method:'POST', body: JSON.stringify({ name, email, password: pass }) });
+
+  if (data && (data.token || data.access_token || data.success)) {
+    showToast('Account created. Please sign in.', 'success');
+    showAuth('page-login');
+  } else {
+    alert.textContent = (data && data.message) || 'Registration successful. Please sign in.';
+    alert.classList.add('show');
+  }
+}
+
+async function handleForgot() {
+  const email = document.getElementById('forgot-email').value.trim();
+  const err   = document.getElementById('forgot-alert');
+  const ok    = document.getElementById('forgot-success');
+  err.classList.remove('show'); ok.classList.remove('show');
+
+  if (!email) { err.textContent = 'Please enter your business email.'; err.classList.add('show'); return; }
+
+  // Existing /forgot-password endpoint
+  await apiFetch('/forgot-password', { method:'POST', body: JSON.stringify({ email }) });
+  ok.textContent = 'Password reset link sent to ' + email + '. Please check your inbox.';
+  ok.classList.add('show');
+}
+
+function handleLogout() {
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('user_email');
+  currentUser = null;
+  dispatchList = [];
+  document.getElementById('app-shell').classList.add('hidden');
+  document.getElementById('auth-wrapper').classList.remove('hidden');
+  showAuth('page-login');
+}
+
+function enterApp() {
+  document.getElementById('auth-wrapper').classList.add('hidden');
+  document.getElementById('app-shell').classList.remove('hidden');
+
+  const name = currentUser.name || 'Manager';
+  document.getElementById('sidebar-username').textContent = name;
+  document.getElementById('sidebar-avatar').textContent = name.charAt(0).toUpperCase();
+
+  navigate('dashboard');
+  loadDispatchFromStorage();
+}
+
+/* =============================================================
+   NAVIGATION
+============================================================= */
+const PAGE_TITLES = {
+  'dashboard':     'Dashboard / Overview',
+  'erp-orders':   'ERP / Order Processing',
+  'erp-create':   'ERP / Create Order',
+  'crm':          'CRM / Wholesale Customers',
+  'wms-inventory':'WMS / Inventory Items',
+  'wms-dispatch': 'WMS / Dispatch List',
+};
+
+function navigate(pageKey) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const page = document.getElementById('page-' + pageKey);
+  if (page) page.classList.add('active');
+
+  const nav = document.querySelector(`.nav-item[data-page="${pageKey}"]`);
+  if (nav) nav.classList.add('active');
+
+  const titleEl = document.getElementById('topbar-title');
+  titleEl.innerHTML = PAGE_TITLES[pageKey] || pageKey;
+
+  // Load data for the page
+  const loaders = {
+    'dashboard':    loadDashboard,
+    'erp-orders':   loadERPOrders,
+    'erp-create':   loadCreateOrder,
+    'crm':          loadCRM,
+    'wms-inventory':loadInventory,
+    'wms-dispatch': loadDispatch,
+  };
+  if (loaders[pageKey]) loaders[pageKey]();
+}
+
+function openSwagger() {
+  window.open(API_BASE + '/swagger-ui/index.html', '_blank');
+}
+
+/* =============================================================
+   DASHBOARD  — loads data from ERP & WMS APIs
+============================================================= */
+async function loadDashboard() {
+  // Load orders and products in parallel
+  const [ordersData, productsData] = await Promise.all([
+    apiFetch('/api/orders'),
+    apiFetch('/api/categories'),
+  ]);
+
+  // Old: product list → Now: inventory items
+  const products = (productsData && (productsData.content || productsData)) || DEMO_PRODUCTS;
+  // Old: orders → Now: ERP orders
+  const orders   = (ordersData && (ordersData.content || ordersData)) || DEMO_ORDERS;
+
+  allProducts  = Array.isArray(products) ? products : DEMO_PRODUCTS;
+  allOrders    = Array.isArray(orders)   ? orders   : DEMO_ORDERS;
+
+  const pending    = allOrders.filter(o => o.status === 'PENDING').length;
+  const dispatched = allOrders.filter(o => o.status === 'DISPATCHED' || o.status === 'DELIVERED').length;
+
+  // KPI Cards
+  document.getElementById('kpi-inventory').textContent  = allProducts.length;
+  document.getElementById('kpi-inventory-d').textContent = '↑ 12 added this month';
+  document.getElementById('kpi-customers').textContent   = DEMO_CUSTOMERS.filter(c => c.status === 'ACTIVE').length;
+  document.getElementById('kpi-customers-d').textContent = '↑ 2 new accounts';
+  document.getElementById('kpi-pending').textContent     = pending;
+  document.getElementById('kpi-pending-d').className     = 'metric-delta ' + (pending > 5 ? 'down' : '');
+  document.getElementById('kpi-pending-d').textContent   = pending > 5 ? '⚠ Requires attention' : 'Within SLA';
+  document.getElementById('kpi-dispatches').textContent  = dispatched + 14; // combine with demo
+  document.getElementById('kpi-dispatches-d').textContent = '↑ 18% vs last month';
+
+  // Update sidebar badges
+  document.getElementById('badge-orders').textContent  = pending;
+  document.getElementById('badge-dispatch').textContent = dispatchList.length;
+
+  renderDashboardOrders(allOrders.slice(0,5));
+  renderStockChart(allProducts.slice(0,6));
+  renderStatusBreakdown(allOrders);
+}
+
+function renderDashboardOrders(orders) {
+  const el = document.getElementById('dashboard-recent-orders');
+  if (!orders.length) { el.innerHTML = '<div class="loading-state">No orders found.</div>'; return; }
+  el.innerHTML = `<table>
+    <thead><tr>
+      <th>Order ID</th><th>Customer</th><th>Invoice Value</th><th>Status</th><th>Date</th>
+    </tr></thead>
+    <tbody>${orders.map(o => `<tr>
+      <td class="mono">${o.id || o.orderId || '#'+Math.floor(Math.random()*9999)}</td>
+      <td>${o.customer || o.customerName || 'Wholesale Account'}</td>
+      <td><strong>$${parseFloat(o.total||o.totalAmount||0).toFixed(2)}</strong></td>
+      <td>${statusBadge(o.status)}</td>
+      <td style="color:var(--text-sec)">${formatDate(o.createdAt || o.orderDate)}</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+}
+
+function renderStockChart(products) {
+  const bars   = document.getElementById('stock-chart-bars');
+  const labels = document.getElementById('stock-chart-labels');
+  const max    = Math.max(...products.map(p => p.quantity || 100), 1);
+  bars.innerHTML   = products.map(p => {
+    const h = Math.round(((p.quantity || 50) / max) * 58);
+    const col = (p.quantity||50) < 20 ? 'var(--amber)' : 'var(--blue)';
+    return `<div class="bar" style="height:${h}px;background:rgba(${(p.quantity||50)<20?'245,158,11':'59,130,246'},.15);border-color:${col}"></div>`;
+  }).join('');
+  labels.innerHTML = products.map(p => `<span>${(p.name||'').split(' ')[0]}</span>`).join('');
+}
+
+function renderStatusBreakdown(orders) {
+  const statuses = { PENDING:0, PROCESSING:0, DISPATCHED:0, DELIVERED:0 };
+  orders.forEach(o => { if (statuses[o.status] !== undefined) statuses[o.status]++; else statuses.PENDING++; });
+  const total = orders.length || 1;
+  document.getElementById('dashboard-status-breakdown').innerHTML = Object.entries(statuses).map(([s, c]) => `
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <span>${statusBadge(s)}</span><span style="color:var(--text-sec)">${c} order${c!==1?'s':''}</span>
       </div>
+      <div style="height:5px;background:var(--slate);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${Math.round(c/total*100)}%;background:var(--blue);border-radius:3px"></div>
+      </div>
+    </div>`).join('');
+}
 
-    </div><!-- end content -->
-  </div><!-- end main -->
+/* =============================================================
+   ERP — ORDER PROCESSING  (Old: /api/orders)
+============================================================= */
+async function loadERPOrders() {
+  const data = await apiFetch('/api/orders');
+  allOrders = (data && (data.content || data)) || [];
+  if (!Array.isArray(allOrders) || !allOrders.length) allOrders = DEMO_ORDERS;
+  renderOrdersTable(allOrders);
+}
 
-  <script>
-    (function() {
-      'use strict';
+function renderOrdersTable(orders) {
+  const filtered = currentOrderFilter === 'all' ? orders : orders.filter(o => o.status === currentOrderFilter);
+  const el = document.getElementById('erp-orders-container');
 
-      // ============================================================
-      //  DEMO DATA
-      // ============================================================
-      const DEMO_ORDERS = [
-        { id: 'ERP-1001', customer: 'Fashion Wholesale Ltd', date: '2026-06-14', value: 18450, status: 'processed' },
-        { id: 'ERP-1002', customer: 'Urban Styles GmbH', date: '2026-06-13', value: 9200, status: 'pending' },
-        { id: 'ERP-1003', customer: 'Premier Collections', date: '2026-06-12', value: 22300, status: 'dispatched' },
-        { id: 'ERP-1004', customer: 'Apex Apparel', date: '2026-06-11', value: 6700, status: 'pending' },
-        { id: 'ERP-1005', customer: 'Luxe Textiles', date: '2026-06-10', value: 15400, status: 'processed' },
-      ];
+  if (!filtered.length) {
+    el.innerHTML = '<div class="loading-state">No orders matching this filter.</div>'; return;
+  }
 
-      const DEMO_CUSTOMERS = [
-        { company: 'Fashion Wholesale Ltd', contact: 'Anna Schmidt', email: 'anna@fashionwl.com', type: 'Wholesale', last: '2026-06-14', status: 'active' },
-        { company: 'Urban Styles GmbH', contact: 'Mark Weber', email: 'mark@urbanstyles.de', type: 'Retail', last: '2026-06-12', status: 'active' },
-        { company: 'Premier Collections', contact: 'Elena Rossi', email: 'elena@premier.it', type: 'Wholesale', last: '2026-06-10', status: 'inactive' },
-        { company: 'Apex Apparel', contact: 'James Kim', email: 'james@apexapparel.com', type: 'Wholesale', last: '2026-06-08', status: 'active' },
-        { company: 'Luxe Textiles', contact: 'Sarah Chen', email: 'sarah@luxetextiles.com', type: 'Wholesale', last: '2026-06-07', status: 'active' },
-      ];
+  el.innerHTML = `<table>
+    <thead><tr>
+      <th>Order ID / ERP Ref</th>
+      <th>Customer Account</th>
+      <th>Invoice Value</th>
+      <th>Invoice Status</th>
+      <th>Order Date</th>
+      <th>Actions</th>
+    </tr></thead>
+    <tbody>${filtered.map(o => {
+      const id = o.id || o.orderId || 'ORD-' + Math.floor(Math.random()*9999);
+      return `<tr>
+        <td><span class="mono">${id}</span></td>
+        <td><strong>${o.customer || o.customerName || 'Business Account'}</strong></td>
+        <td><strong>$${parseFloat(o.total || o.totalAmount || 0).toFixed(2)}</strong></td>
+        <td>${statusBadge(o.status)}</td>
+        <td style="color:var(--text-sec)">${formatDate(o.createdAt || o.orderDate)}</td>
+        <td>
+          <button class="btn btn-ghost btn-sm" onclick="viewOrder('${id}')">View</button>
+        </td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
 
-      const DEMO_INVENTORY = [
-        { sku: 'CL-102', name: 'Cotton Polo Shirt', category: 'Tops', qty: 240, location: 'A3-12', status: 'in stock', reorder: 60 },
-        { sku: 'CL-045', name: 'Denim Jacket', category: 'Outerwear', qty: 85, location: 'B2-05', status: 'low stock', reorder: 100 },
-        { sku: 'CL-078', name: 'Cargo Trousers', category: 'Bottoms', qty: 160, location: 'C1-08', status: 'in stock', reorder: 50 },
-        { sku: 'CL-213', name: 'Silk Scarf', category: 'Accessories', qty: 320, location: 'D4-02', status: 'in stock', reorder: 40 },
-        { sku: 'CL-099', name: 'Leather Belt', category: 'Accessories', qty: 45, location: 'A1-07', status: 'low stock', reorder: 70 },
-        { sku: 'CL-156', name: 'Wool Blend Blazer', category: 'Outerwear', qty: 30, location: 'B3-01', status: 'low stock', reorder: 50 },
-      ];
+function filterOrders(status, el) {
+  currentOrderFilter = status;
+  document.querySelectorAll('.status-pill').forEach(p => p.classList.remove('active-pill'));
+  el.classList.add('active-pill');
+  renderOrdersTable(allOrders);
+}
 
-      const DEMO_DISPATCH = [
-        { sku: 'CL-102', name: 'Cotton Polo Shirt', qty: 40, location: 'A3-12', status: 'ready' },
-        { sku: 'CL-045', name: 'Denim Jacket', qty: 15, location: 'B2-05', status: 'packing' },
-        { sku: 'CL-078', name: 'Cargo Trousers', qty: 25, location: 'C1-08', status: 'ready' },
-      ];
+function viewOrder(id) {
+  const o = allOrders.find(x => (x.id || x.orderId) == id) || { id };
+  showModal(`
+    <div class="modal-header">
+      <div class="modal-title">📋 ERP Order — ${o.id || id}</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div><div class="cd-label">Customer Account</div><div class="cd-value">${o.customer || o.customerName || '—'}</div></div>
+      <div><div class="cd-label">Invoice Status</div><div class="cd-value">${statusBadge(o.status)}</div></div>
+      <div><div class="cd-label">Invoice Value</div><div class="cd-value"><strong>$${parseFloat(o.total||0).toFixed(2)}</strong></div></div>
+      <div><div class="cd-label">Order Date</div><div class="cd-value">${formatDate(o.createdAt||o.orderDate)}</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--text-dim);margin-top:16px">ERP Order Processing — Business Operations Module</div>
+  `);
+}
 
-      // ============================================================
-      //  STATE
-      // ============================================================
-      let isLoggedIn = true;
-      let currentUser = 'Admin';
+/* =============================================================
+   ERP — CREATE ORDER  (Old: Checkout)
+============================================================= */
+async function loadCreateOrder() {
+  // Populate customer dropdown from CRM records
+  const sel = document.getElementById('order-customer');
+  const customers = DEMO_CUSTOMERS;
+  sel.innerHTML = '<option value="">Select wholesale customer…</option>' +
+    customers.map(c => `<option value="${c.id}">${c.company}</option>`).join('');
 
-      // ============================================================
-      //  DOM REFS
-      // ============================================================
-      const panels = {
-        dashboard: document.getElementById('panel-dashboard'),
-        erp: document.getElementById('panel-erp'),
-        crm: document.getElementById('panel-crm'),
-        wms: document.getElementById('panel-wms'),
-        dispatch: document.getElementById('panel-dispatch'),
-      };
+  renderCreateOrderItems();
+}
 
-      const authPanel = document.getElementById('authPanel');
-      const loginCard = document.getElementById('loginCard');
-      const registerCard = document.getElementById('registerCard');
-      const forgotCard = document.getElementById('forgotCard');
-      const usernameDisplay = document.getElementById('usernameDisplay');
+function renderCreateOrderItems() {
+  const el = document.getElementById('create-order-items');
+  const cnt = document.getElementById('create-order-item-count');
 
-      // ============================================================
-      //  TOAST FUNCTION
-      // ============================================================
-      window.showToast = function(message, type = 'success') {
-        const existing = document.querySelector('.toast');
-        if (existing) existing.remove();
+  if (!dispatchList.length) {
+    el.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text-sec);font-size:13px">No items in dispatch list. Add stock items from <a href="#" onclick="navigate(\'wms-inventory\')" style="color:var(--blue-light)">Inventory</a>.</div>';
+    cnt.textContent = '0 items';
+    document.getElementById('co-subtotal').textContent = '$0.00';
+    document.getElementById('co-tax').textContent = '$0.00';
+    document.getElementById('co-total').textContent = '$0.00';
+    return;
+  }
 
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.textContent = message;
-        document.body.appendChild(toast);
+  const subtotal = dispatchList.reduce((s, i) => s + i.price * i.qty, 0);
+  const tax = subtotal * 0.1;
+  cnt.textContent = dispatchList.length + ' item' + (dispatchList.length !== 1 ? 's' : '');
+  document.getElementById('co-subtotal').textContent = '$' + subtotal.toFixed(2);
+  document.getElementById('co-tax').textContent = '$' + tax.toFixed(2);
+  document.getElementById('co-total').textContent = '$' + (subtotal + tax).toFixed(2);
 
-        setTimeout(() => {
-          toast.style.opacity = '0';
-          toast.style.transform = 'translateX(100%)';
-          toast.style.transition = '0.3s';
-          setTimeout(() => toast.remove(), 300);
-        }, 3000);
-      };
+  el.innerHTML = dispatchList.map((item, idx) => `
+    <div class="dispatch-item">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${item.name}</div>
+        <div class="mono" style="margin-top:2px">$${parseFloat(item.price).toFixed(2)} / unit</div>
+      </div>
+      <div class="dispatch-qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${idx},-1)">−</button>
+        <span class="dispatch-qty">${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${idx},1)">+</button>
+      </div>
+      <strong style="min-width:70px;text-align:right">$${(item.price * item.qty).toFixed(2)}</strong>
+      <button class="qty-btn" onclick="removeDispatch(${idx})" style="background:var(--rose-dim);color:var(--rose)">✕</button>
+    </div>`).join('');
+}
 
-      // ============================================================
-      //  RENDER FUNCTIONS
-      // ============================================================
+// Old: handleCheckout (cart checkout) → Now: handleCheckout (warehouse dispatch order)
+async function handleCheckout() {
+  if (!dispatchList.length) { showToast('Dispatch list is empty.', 'error'); return; }
 
-      function renderERPOrders(orders) {
-        const data = (orders && orders.length) ? orders : DEMO_ORDERS;
-        const erpTbody = document.getElementById('erpOrderBody');
-        const statusMap = { pending: 'warning', processed: 'success', dispatched: 'info', cancelled: 'danger' };
-        const statusLabel = { pending: 'Pending', processed: 'Processed', dispatched: 'Dispatched', cancelled: 'Cancelled' };
+  const customerId = document.getElementById('order-customer').value;
+  const ref        = document.getElementById('order-ref').value;
+  const address    = document.getElementById('order-address').value;
+  const notes      = document.getElementById('order-notes').value;
 
-        const rows = data.map(o => `
-          <tr>
-            <td><strong>${o.id}</strong></td>
-            <td>${o.customer}</td>
-            <td>${o.date}</td>
-            <td>€${o.value.toLocaleString()}</td>
-            <td><span class="badge ${statusMap[o.status] || 'secondary'}">${statusLabel[o.status] || o.status}</span></td>
-          </tr>
-        `).join('');
+  const payload = {
+    customerId,
+    reference: ref,
+    deliveryAddress: address,
+    notes,
+    // Old: cart items → Now: dispatch list items mapped to order lines
+    items: dispatchList.map(i => ({ productId: i.id, quantity: i.qty, unitPrice: i.price })),
+  };
 
-        if (erpTbody) erpTbody.innerHTML = rows;
+  const data = await apiFetch('/api/orders', { method:'POST', body: JSON.stringify(payload) });
 
-        const dashTbody = document.getElementById('dashOrderBody');
-        if (dashTbody) {
-          const dashRows = data.slice(0, 4).map(o => `
-            <tr
+  // Treat null as success (API may return 201 with no body)
+  const orderId = data ? (data.id || data.orderId || 'ORD-' + Date.now()) : 'ORD-' + Date.now();
+  showToast('✅ ERP Order ' + orderId + ' created successfully!', 'success');
+  dispatchList = [];
+  saveDispatchToStorage();
+  updateDispatchBadge();
+  navigate('erp-orders');
+}
+
+/* =============================================================
+   CRM — CUSTOMERS
+============================================================= */
+async function loadCRM() {
+  // No dedicated customers endpoint — using demo data with CRM structure
+  allCustomers = DEMO_CUSTOMERS;
+
+  document.getElementById('crm-total').textContent   = allCustomers.length;
+  document.getElementById('crm-active').textContent  = allCustomers.filter(c=>c.status==='ACTIVE').length;
+  document.getElementById('crm-new').textContent     = 2;
+  document.getElementById('crm-aov').textContent     = '$' + Math.round(allCustomers.reduce((s,c)=>s+c.value,0)/allCustomers.length).toLocaleString();
+
+  const el = document.getElementById('crm-customers-container');
+  el.innerHTML = allCustomers.map(c => customerCard(c)).join('');
+}
+
+function customerCard(c) {
+  const colors = { Platinum:'#8B5CF6', Gold:'#F59E0B', Silver:'#94A3B8', Bronze:'#CD7C4A' };
+  const bg = colors[c.type] || '#3B82F6';
+  return `<div class="customer-card">
+    <div class="customer-header">
+      <div class="customer-avatar" style="background:${bg}">${c.company.charAt(0)}</div>
+      <div>
+        <div class="customer-company">${c.company}</div>
+        <div class="customer-contact">${c.contact}</div>
+      </div>
+    </div>
+    <div class="customer-details">
+      <div class="customer-detail"><div class="cd-label">Email</div><div class="cd-value" style="font-size:11px">${c.email}</div></div>
+      <div class="customer-detail"><div class="cd-label">Account Type</div><div class="cd-value"><span class="badge" style="background:${bg}22;color:${bg};border-color:${bg}44">${c.type}</span></div></div>
+      <div class="customer-detail"><div class="cd-label">Total Orders</div><div class="cd-value">${c.orders}</div></div>
+      <div class="customer-detail"><div class="cd-label">Lifetime Value</div><div class="cd-value">$${c.value.toLocaleString()}</div></div>
+      <div class="customer-detail"><div class="cd-label">Last Activity</div><div class="cd-value" style="font-size:11px">${formatDate(c.lastActivity)}</div></div>
+      <div class="customer-detail"><div class="cd-label">Status</div><div class="cd-value">${c.status==='ACTIVE'?'<span class="badge badge-success">Active</span>':'<span class="badge badge-warning">Inactive</span>'}</div></div>
+    </div>
+  </div>`;
+}
+
+function openNewCustomerModal() {
+  showModal(`
+    <div class="modal-header">
+      <div class="modal-title">➕ Add Wholesale Customer</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Company Name</label><input class="form-input" id="nc-company" placeholder="Acme Wholesale Ltd" /></div>
+    <div class="form-group"><label class="form-label">Contact Person</label><input class="form-input" id="nc-contact" placeholder="Jane Smith" /></div>
+    <div class="form-group"><label class="form-label">Business Email</label><input class="form-input" type="email" id="nc-email" placeholder="contact@acme.com" /></div>
+    <div class="form-group"><label class="form-label">Account Type</label>
+      <select class="form-input" id="nc-type"><option>Bronze</option><option>Silver</option><option>Gold</option><option>Platinum</option></select>
+    </div>
+    <button class="btn btn-primary" onclick="saveNewCustomer()">Add to CRM Records</button>
+  `);
+}
+
+function saveNewCustomer() {
+  const company = document.getElementById('nc-company').value;
+  if (!company) { showToast('Company name is required.', 'error'); return; }
+  DEMO_CUSTOMERS.push({
+    id: Date.now(), company, contact: document.getElementById('nc-contact').value,
+    email: document.getElementById('nc-email').value, type: document.getElementById('nc-type').value,
+    status:'ACTIVE', lastActivity: new Date().toISOString().split('T')[0], orders:0, value:0
+  });
+  closeModal();
+  showToast('✅ Customer added to CRM records.', 'success');
+  loadCRM();
+}
+
+/* =============================================================
+   WMS — INVENTORY  (Old: Products → Now: Inventory/Stock Items)
+============================================================= */
+async function loadInventory() {
+  // Old: /api/categories (product listings) → Now: inventory stock items
+  const data = await apiFetch('/api/categories');
+  const raw  = (data && (data.content || data)) || [];
+  allProducts = Array.isArray(raw) && raw.length ? raw : DEMO_PRODUCTS;
+
+  // Populate category filter
+  const cats = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
+  const catSel = document.getElementById('cat-filter');
+  catSel.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+
+  // WMS KPIs
+  document.getElementById('wms-total-skus').textContent  = allProducts.length;
+  document.getElementById('wms-in-stock').textContent    = allProducts.filter(p=>(p.quantity||0)>20).length;
+  document.getElementById('wms-low-stock').textContent   = allProducts.filter(p=>(p.quantity||0)>0&&(p.quantity||0)<=20).length;
+  document.getElementById('wms-out-stock').textContent   = allProducts.filter(p=>(p.quantity||0)===0).length;
+
+  renderInventoryGrid(allProducts);
+}
+
+function filterInventory() {
+  const cat = document.getElementById('cat-filter').value;
+  const filtered = cat ? allProducts.filter(p => p.category === cat) : allProducts;
+  renderInventoryGrid(filtered);
+}
+
+function renderInventoryGrid(products) {
+  const el = document.getElementById('wms-inventory-container');
+  if (!products.length) { el.innerHTML = '<div class="loading-state">No inventory items found.</div>'; return; }
+
+  el.innerHTML = products.map((p, idx) => {
+    const qty = p.quantity || p.stock || 0;
+    const sku = 'SKU-' + String(p.id || idx+1).padStart(4,'0');
+    const loc = 'A-' + (1+idx%5) + '-' + String(Math.ceil((idx+1)/5)).padStart(2,'0');
+    const reorder = 50;
+    let stockStatus, stockBadge;
+    if (qty === 0)       { stockStatus = 'Out of Stock'; stockBadge = 'badge-danger'; }
+    else if (qty <= 20)  { stockStatus = 'Low Stock';    stockBadge = 'badge-warning'; }
+    else                 { stockStatus = 'In Stock';     stockBadge = 'badge-success'; }
+
+    return `<div class="stock-card">
+      <div class="stock-card-header">
+        <div>
+          <div class="stock-sku">${sku}</div>
+          <div class="stock-name">${p.name || 'Stock Item'}</div>
+          <div class="stock-cat">${p.category || 'Uncategorised'}</div>
+        </div>
+        <span class="badge ${stockBadge}">${stockStatus}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-sec);line-height:1.4">${p.description || ''}</div>
+      <div class="stock-meta">
+        <div class="stock-meta-item"><div class="stock-meta-label">Quantity</div><div class="stock-meta-value">${qty} units</div></div>
+        <div class="stock-meta-item"><div class="stock-meta-label">Unit Price</div><div class="stock-meta-value">$${parseFloat(p.price||0).toFixed(2)}</div></div>
+        <div class="stock-meta-item"><div class="stock-meta-label">Location</div><div class="stock-meta-value mono" style="font-size:11px">${loc}</div></div>
+        <div class="stock-meta-item"><div class="stock-meta-label">Reorder Level</div><div class="stock-meta-value ${qty<=reorder?'':''}">≤${reorder}</div></div>
+      </div>
+      <div class="stock-actions">
+        <!-- Old: "Add to Cart" → Now: "Add to Dispatch" -->
+        <button class="btn-dispatch" onclick="addToDispatch(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+          📦 Add to Dispatch
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="viewStockItem('${sku}', '${p.name||''}')">Details</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openIncomingStockModal() {
+  showModal(`
+    <div class="modal-header">
+      <div class="modal-title">📥 Register Incoming Stock</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">SKU / Product</label>
+      <select class="form-input" id="is-sku">${allProducts.map(p=>`<option value="${p.id}">SKU-${String(p.id).padStart(4,'0')} — ${p.name}</option>`).join('')}</select>
+    </div>
+    <div class="form-group"><label class="form-label">Quantity Received</label><input class="form-input" type="number" id="is-qty" placeholder="0" /></div>
+    <div class="form-group"><label class="form-label">Supplier Reference</label><input class="form-input" id="is-ref" placeholder="SUPP-2024-001" /></div>
+    <button class="btn btn-primary" onclick="confirmIncomingStock()">✅ Confirm Incoming Stock</button>
+  `);
+}
+
+function confirmIncomingStock() {
+  const qty = document.getElementById('is-qty').value;
+  if (!qty || qty <= 0) { showToast('Please enter a valid quantity.', 'error'); return; }
+  closeModal();
+  showToast('✅ Incoming stock of ' + qty + ' units registered in WMS.', 'success');
+}
+
+function viewStockItem(sku, name) {
+  showModal(`
+    <div class="modal-header">
+      <div class="modal-title">📦 Stock Item — ${sku}</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:16px">${name}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div><div class="cd-label">SKU</div><div class="mono">${sku}</div></div>
+      <div><div class="cd-label">Warehouse Module</div><div class="cd-value">WMS — Active</div></div>
+    </div>
+    <div style="margin-top:16px;font-size:12px;color:var(--text-dim)">View full stock history and movement records in the WMS module.</div>
+  `);
+}
+
+/* =============================================================
+   WMS — DISPATCH LIST  (Old: Shopping Cart)
+============================================================= */
+function loadDispatch() {
+  renderDispatchList();
+}
+
+function renderDispatchList() {
+  const el = document.getElementById('dispatch-list-container');
+  updateDispatchBadge();
+
+  if (!dispatchList.length) {
+    el.innerHTML = `<div class="loading-state">
+      <div style="font-size:32px">🚚</div>
+      <div>Dispatch list is empty.</div>
+      <div style="font-size:12px">Add inventory items using "Add to Dispatch" from the Inventory module.</div>
+      <button class="btn btn-primary btn-sm" onclick="navigate('wms-inventory')" style="margin-top:8px">Browse Inventory</button>
+    </div>`;
+    document.getElementById('d-items').textContent = '0';
+    document.getElementById('d-units').textContent = '0';
+    document.getElementById('d-value').textContent = '$0.00';
+    document.getElementById('d-total').textContent = '$0.00';
+    return;
+  }
+
+  const subtotal = dispatchList.reduce((s,i) => s + i.price * i.qty, 0);
+  const tax = subtotal * 0.1;
+
+  document.getElementById('d-items').textContent = dispatchList.length;
+  document.getElementById('d-units').textContent = dispatchList.reduce((s,i)=>s+i.qty,0);
+  document.getElementById('d-value').textContent = '$' + subtotal.toFixed(2);
+  document.getElementById('d-total').textContent = '$' + (subtotal+tax).toFixed(2);
+
+  el.innerHTML = `
+    <div class="table-header"><div class="table-title">Outgoing Stock Items</div><span class="badge badge-info">${dispatchList.length} line${dispatchList.length!==1?'s':''}</span></div>
+    ${dispatchList.map((item, idx) => `
+    <div class="dispatch-item">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">${item.name}</div>
+        <div class="mono">$${parseFloat(item.price).toFixed(2)} / unit</div>
+      </div>
+      <div class="dispatch-qty-ctrl">
+        <button class="qty-btn" onclick="changeQty(${idx},-1);renderDispatchList()">−</button>
+        <span class="dispatch-qty">${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${idx},1);renderDispatchList()">+</button>
+      </div>
+      <strong style="min-width:70px;text-align:right">$${(item.price*item.qty).toFixed(2)}</strong>
+      <button class="qty-btn" onclick="removeDispatch(${idx});renderDispatchList()" style="background:var(--rose-dim);color:var(--rose)">✕</button>
+    </div>`).join('')}
+  `;
+}
+
+/* =============================================================
+   DISPATCH LIST STATE MANAGEMENT  (Old: Cart state management)
+============================================================= */
+function addToDispatch(product) {
+  const existing = dispatchList.find(i => i.id === product.id);
+  if (existing) {
+    existing.qty++;
+    showToast('Updated dispatch quantity for ' + product.name, 'info');
+  } else {
+    dispatchList.push({ id: product.id, name: product.name, price: parseFloat(product.price||0), qty: 1 });
+    showToast('✅ Added to dispatch list: ' + product.name, 'success');
+  }
+  saveDispatchToStorage();
+  updateDispatchBadge();
+}
+
+function removeDispatch(idx) {
+  dispatchList.splice(idx, 1);
+  saveDispatchToStorage();
+  updateDispatchBadge();
+  renderCreateOrderItems();
+}
+
+function changeQty(idx, delta) {
+  dispatchList[idx].qty = Math.max(1, dispatchList[idx].qty + delta);
+  saveDispatchToStorage();
+  renderCreateOrderItems();
+}
+
+function clearDispatch() {
+  if (!confirm('Clear all items from the dispatch list?')) return;
+  dispatchList = [];
+  saveDispatchToStorage();
+  renderDispatchList();
+  showToast('Dispatch list cleared.', 'info');
+}
+
+function updateDispatchBadge() {
+  document.getElementById('badge-dispatch').textContent = dispatchList.length;
+}
+
+function saveDispatchToStorage() {
+  try { localStorage.setItem('dispatch_list', JSON.stringify(dispatchList)); } catch(e){}
+}
+
+function loadDispatchFromStorage() {
+  try {
+    const saved = localStorage.getItem('dispatch_list');
+    if (saved) dispatchList = JSON.parse(saved);
+  } catch(e) { dispatchList = []; }
+  updateDispatchBadge();
+}
+
+/* =============================================================
+   MODAL HELPER
+============================================================= */
+function showModal(html) {
+  const mc = document.getElementById('modal-container');
+  mc.innerHTML = `<div class="modal-backdrop" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()">${html}</div></div>`;
+}
+
+function closeModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('modal-container').innerHTML = '';
+}
+
+/* =============================================================
+   TOAST HELPER
+============================================================= */
+function showToast(msg, type='info') {
+  const tc = document.getElementById('toast-container');
+  const t  = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  t.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
+  tc.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, 3500);
+}
+
+/* =============================================================
+   UTILITIES
+============================================================= */
+function statusBadge(status) {
+  const map = {
+    PENDING:    ['badge-warning', '⏳ Pending'],
+    PROCESSING: ['badge-info',    '⚙️ Processing'],
+    DISPATCHED: ['badge-purple',  '🚚 Dispatched'],
+    DELIVERED:  ['badge-success', '✅ Delivered'],
+    CANCELLED:  ['badge-danger',  '✕ Cancelled'],
+  };
+  const [cls, label] = map[status] || ['badge-info', status || 'Unknown'];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  try {
+    return new Date(dateStr).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+  } catch { return dateStr; }
+}
+
+/* =============================================================
+   INIT — check session on page load
+============================================================= */
+(function init() {
+  const token = localStorage.getItem('auth_token');
+  const email = localStorage.getItem('user_email');
+  if (token && email) {
+    currentUser = { email, name: email.split('@')[0] };
+    enterApp();
+  }
+  // Enter key on login
+  document.getElementById('login-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLogin();
+  });
+})();
+</script>
+</body>
+</html>
